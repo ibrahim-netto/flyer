@@ -1,0 +1,57 @@
+version: "3.5"
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgis/postgis:13-master
+    restart: unless-stopped
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "directus"
+      POSTGRES_PASSWORD: "directus"
+      POSTGRES_DB: "directus"
+    logging:
+      options:
+        max-size: ${DOCKER_LOG_MAX_SIZE}
+        max-file: ${DOCKER_LOG_MAX_FILE}
+
+  redis:
+    container_name: redis
+    image: redis:6
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: ${DOCKER_LOG_MAX_SIZE}
+        max-file: ${DOCKER_LOG_MAX_FILE}
+
+  directus:
+    container_name: directus
+    image: directus/directus:latest
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    ports:
+      - 8055:8055
+    volumes:
+      - ./uploads:/directus/uploads
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      DB_CLIENT: ${DIRECTUS_DB_CLIENT}
+      DB_HOST: ${DIRECTUS_DB_HOST}
+      DB_PORT: ${DIRECTUS_DB_PORT}
+      DB_DATABASE: ${DIRECTUS_DB_DATABASE}
+      DB_USER: ${DIRECTUS_DB_USER}
+      DB_PASSWORD: ${DIRECTUS_DB_PASSWORD}
+      CACHE_ENABLED: ${DIRECTUS_CACHE_ENABLED}
+      CACHE_STORE: ${DIRECTUS_CACHE_STORE}
+      CACHE_REDIS: ${DIRECTUS_CACHE_REDIS}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+    logging:
+      options:
+        max-size: ${DOCKER_LOG_MAX_SIZE}
+        max-file: ${DOCKER_LOG_MAX_FILE}
