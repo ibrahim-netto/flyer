@@ -3,7 +3,8 @@ const schema = {
     properties: {
         href: {
             type: 'string',
-            format: 'uri'
+            format: 'uri',
+            maxLength: 200
         },
         language: {
             type: 'string',

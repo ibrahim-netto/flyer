@@ -12,6 +12,9 @@ const Tracing = require('@sentry/tracing');
 const helmet = require('helmet');
 const cors = require('cors');
 const corsOptions = require('./src/cors-options');
+const swaggerHeaders = require('./src/swagger/headers.swagger');
+const swaggerUi = require('swagger-ui-express');
+const swaggerOptions = require('./src/swagger/options.swagger');
 const createCollections = require('./src/collections');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
@@ -65,7 +68,7 @@ const errorHandler = require('./src/error-handler');
         }
 
         app.use(express.static('public'));
-
+        app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
         app.post('/ads', controller.getAds);
 
         app.use(Sentry.Handlers.errorHandler());

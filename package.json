@@ -30,6 +30,7 @@
     "express-winston": "^4.2.0",
     "helmet": "^5.0.2",
     "lodash": "^4.17.21",
+    "swagger-ui-express": "^4.4.0",
     "winston": "^3.7.2"
   }
 }
