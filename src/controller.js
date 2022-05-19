@@ -17,15 +17,19 @@ module.exports.getAds = async (req, res, next) => {
 
         const url = new URL(body.href);
 
-        const ads = await directus.items('ads').readByQuery({
+        const query = {
             filter: {
                 hostname: url.hostname,
                 pathname: url.pathname,
-                language: body.language
+                language: body.language,
+                placeholder: {
+                    _in: [body.placeholders]
+                }
             }
-        });
+        }
+        const { data: ads } = await directus.items('ads').readByQuery(query);
 
-        res.json({ status: 'success', ads: ads });
+        res.json({ status: 'success', data: ads });
     } catch (err) {
         next(err);
     }

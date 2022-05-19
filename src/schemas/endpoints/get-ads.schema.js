@@ -1,22 +1,3 @@
-const placeholder = {
-    type: 'object',
-    properties: {
-        name: {
-            type: 'string',
-            maxLength: 200
-        },
-        selector: {
-            type: 'string',
-            maxLength: 200
-        }
-    },
-    required: [
-        'name',
-        'selector'
-    ],
-    additionalProperties: false
-};
-
 const schema = {
     type: 'object',
     properties: {
@@ -32,7 +13,10 @@ const schema = {
             type: 'array',
             minItems: 1,
             maxItems: 100,
-            items: placeholder
+            items: {
+                type: 'string',
+                maxLength: 200
+            }
         },
         // For future implementation
         session_id: {
@@ -43,7 +27,7 @@ const schema = {
     required: [
         'href',
         'language',
-        // 'placeholders'
+        'placeholders'
     ],
     additionalProperties: false
 };
