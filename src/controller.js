@@ -1,6 +1,16 @@
+const _ = require('lodash');
 const directus = require('./directus');
 const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
+
+const { ADS_COLLECTION } = require('./constants');
+
+/*
+    const compiled = _.template('hello {{ user }}!');
+    compiled({ 'user': 'mustache' });
+    => 'hello mustache!'
+ */
+_.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 module.exports.getAds = async (req, res, next) => {
     try {
@@ -15,19 +25,37 @@ module.exports.getAds = async (req, res, next) => {
             return;
         }
 
-        const url = new URL(body.href);
-
+        /*
+            @TODO this query can return more than one Ad for one placement. Needs Fn to choose Ad priority in this cases.
+            @TODO fallback in case language not found
+            @TODO fallback placement not found
+         */
         const query = {
             filter: {
-                hostname: url.hostname,
-                pathname: url.pathname,
-                language: body.language,
-                placeholder: {
-                    _in: [body.placeholders]
-                }
-            }
+                placement: {
+                    _in: [body.placements]
+                },
+                language: body.language
+            },
+            fields: [
+                'id',
+                'placement',
+                'language',
+                'placeholder.id',
+                'placeholder.html',
+                'variables'
+            ]
         }
-        const { data: ads } = await directus.items('ads').readByQuery(query);
+        const { data: ads } = await directus.items(ADS_COLLECTION)
+            .readByQuery(query);
+
+        ads.forEach(ad => {
+            const template = _.template(ad.placeholder.html);
+            const values = Object.fromEntries(ad.variables.map(v => [v.key, v.value]));
+            ad.placeholder.html = template(values);
+
+            delete ad.variables; // Remove from response
+        });
 
         res.json({ status: 'success', data: ads });
     } catch (err) {

@@ -9,7 +9,7 @@ const schema = {
             type: 'string',
             maxLength: 20
         },
-        placeholders: {
+        placements: {
             type: 'array',
             minItems: 1,
             maxItems: 100,
@@ -17,17 +17,12 @@ const schema = {
                 type: 'string',
                 maxLength: 200
             }
-        },
-        // For future implementation
-        session_id: {
-            type: 'string',
-            maxLength: 200
         }
     },
     required: [
         'href',
         'language',
-        'placeholders'
+        'placements'
     ],
     additionalProperties: false
 };
