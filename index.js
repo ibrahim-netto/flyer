@@ -15,7 +15,7 @@ const corsOptions = require('./src/cors-options');
 const swaggerHeaders = require('./src/swagger/headers.swagger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerOptions = require('./src/swagger/options.swagger');
-const createCollections = require('./src/collections');
+const createCollections = require('./src/collections/collections');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 

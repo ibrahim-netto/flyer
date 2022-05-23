@@ -7,17 +7,17 @@ module.exports = {
                 properties: {
                     id: {
                         type: 'string',
-                        description: '',
-                        example: ''
+                        description: 'UUID.',
+                        example: '33c1860b-02e6-401f-8a64-85bf10bf1597'
                     },
                     placement: {
                         type: 'string',
-                        description: '',
+                        description: 'Ad page placement identifier.',
                         example: 'default-top'
                     },
                     language: {
                         type: 'string',
-                        description: '',
+                        description: 'Ad language.',
                         example: 'en-US'
                     },
                     placeholder: {
@@ -31,13 +31,13 @@ module.exports = {
                 properties: {
                     id: {
                         type: 'string',
-                        description: '',
-                        example: ''
+                        description: 'Unique identifier.',
+                        example: 'default-top'
                     },
                     html: {
                         type: 'string',
-                        description: '',
-                        example: ''
+                        description: 'HTML code with optional template variables.',
+                        example: '<h1>{{ text }}</h1>'
                     }
                 }
             },
@@ -48,6 +48,20 @@ module.exports = {
                     msg: 'Invalid value',
                     param: 'lat',
                     location: 'query'
+                }
+            }
+        },
+        requestBodies: {
+            AdsRequest: {
+                type: 'object',
+                description: 'Ad request body.',
+                properties: {
+                    href: {
+                        type: 'string',
+                        maxLength: 200,
+                        example: 'https://www.virail.com'
+                    },
+
                 }
             }
         },

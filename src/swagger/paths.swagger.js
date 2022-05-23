@@ -5,24 +5,31 @@ module.exports = {
                 description: 'Request ads.',
                 operationId: 'requestAds',
                 parameters: [{
+                    name: 'body',
+                    in: 'body',
+                    schema: {
+                        type: 'object',
+
+                    }
+                },{
                     name: 'href',
                     in: 'body',
                     schema: {
                         type: 'string',
-                        maxLength: 200
+                        maxLength: 200,
+                        example: 'https://www.virail.com'
                     },
                     description: 'Page href.',
-                    example: 'https://www.virail.com',
                     required: true
                 }, {
                     name: 'language',
                     in: 'body',
                     schema: {
                         type: 'string',
-                        maxLength: 20
+                        maxLength: 20,
+                        example: 'en-US'
                     },
-                    description: 'Ad language.',
-                    example: 'en-US'
+                    description: 'Ad language.'
                 }, {
                     name: 'placements',
                     in: 'body',
@@ -33,10 +40,10 @@ module.exports = {
                         items: {
                             type: 'string',
                             maxLength: 200
-                        }
+                        },
+                        example: ['default-top']
                     },
-                    description: 'Ad placement.',
-                    example: ['default-top'],
+                    description: 'Ad placement.'
                 }],
                 responses: {
                     '200': {

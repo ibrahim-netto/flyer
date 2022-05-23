@@ -5,3 +5,4 @@ const packageJson = JSON.parse(readFileSync(path.join(process.cwd(), 'package.js
 
 module.exports.VERSION = packageJson.version;
 module.exports.ADS_COLLECTION = 'ads';
+module.exports.PLACEHOLDERS_COLLECTION = 'placeholders';
