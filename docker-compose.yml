@@ -51,6 +51,7 @@ services:
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+      PORT: ${DIRECTUS_PORT}
     logging:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE}
@@ -75,3 +76,6 @@ services:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE}
         max-file: ${DOCKER_LOG_MAX_FILE}
+
+volumes:
+  node_modules:
