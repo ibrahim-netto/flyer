@@ -11,18 +11,22 @@
         // Convert NodeList to Array
         const nodes = [...document.querySelectorAll(`*[data-${adsPlacement}]`)];
         const placements = nodes.map(node => node.dataset[adsPlacement]);
-        const body = {
+
+        const params = new URLSearchParams({
             href: location.href,
             language: navigator.language,
-            placements
-        };
+        });
+        for (const placement of placements) {
+            params.append('placements', placement);
+        }
+        const url = new URL(serverUrl);
+        url.search = params;
 
-        const { data: ads } = await fetch(serverUrl, {
-            method: 'post',
+        const { data: ads } = await fetch(url, {
+            method: 'get',
             headers: {
                 'content-type': 'application/json'
-            },
-            body: JSON.stringify(body)
+            }
         }).then(response => response.json());
 
         for (const ad of ads) {

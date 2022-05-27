@@ -1,0 +1,10 @@
+[
+  {
+    "id": "default-bottom",
+    "html": "<div>\n    <h1>{{ text }}</h1>\n</div>"
+  },
+  {
+    "id": "default-top",
+    "html": "<div>\n    <h1>{{ text }}</h1>\n</div>"
+  }
+]

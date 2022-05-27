@@ -1,19 +1,12 @@
 module.exports = {
     paths: {
         '/ads': {
-            post: {
+            get: {
                 description: 'Request ads.',
                 operationId: 'requestAds',
                 parameters: [{
-                    name: 'body',
-                    in: 'body',
-                    schema: {
-                        type: 'object',
-
-                    }
-                },{
                     name: 'href',
-                    in: 'body',
+                    in: 'query',
                     schema: {
                         type: 'string',
                         maxLength: 200,
@@ -23,7 +16,7 @@ module.exports = {
                     required: true
                 }, {
                     name: 'language',
-                    in: 'body',
+                    in: 'query',
                     schema: {
                         type: 'string',
                         maxLength: 20,
@@ -32,7 +25,7 @@ module.exports = {
                     description: 'Ad language.'
                 }, {
                     name: 'placements',
-                    in: 'body',
+                    in: 'query',
                     schema: {
                         type: 'array',
                         minItems: 1,

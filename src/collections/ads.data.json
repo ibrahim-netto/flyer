@@ -1,0 +1,24 @@
+[
+  {
+    "placement": "default-top",
+    "language": "en-US",
+    "placeholder": "default-top",
+    "variables": [
+      {
+        "key": "text",
+        "value": "Default Top Ad"
+      }
+    ]
+  },
+  {
+    "placement": "default-bottom",
+    "language": "en-US",
+    "placeholder": "default-bottom",
+    "variables": [
+      {
+        "key": "text",
+        "value": "Default Bottom Ad"
+      }
+    ]
+  }
+]

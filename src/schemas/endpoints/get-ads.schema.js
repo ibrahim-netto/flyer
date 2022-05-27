@@ -11,13 +11,18 @@ const schema = {
             maxLength: 20
         },
         placements: {
-            type: 'array',
-            minItems: 1,
-            maxItems: 100,
-            items: {
+            oneOf: [{
+                type: 'array',
+                minItems: 1,
+                maxItems: 100,
+                items: {
+                    type: 'string',
+                    maxLength: 200
+                }
+            }, {
                 type: 'string',
                 maxLength: 200
-            }
+            }]
         }
     },
     required: [

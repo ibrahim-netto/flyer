@@ -8,20 +8,23 @@ const compression = require('compression');
 const bodyParser = require('body-parser');
 const expressWinston = require('express-winston');
 const Sentry = require('@sentry/node');
-const Tracing = require('@sentry/tracing');
 const helmet = require('helmet');
 const cors = require('cors');
 const corsOptions = require('./src/cors-options');
 const swaggerHeaders = require('./src/swagger/headers.swagger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerOptions = require('./src/swagger/options.swagger');
+const setStaticToken = require('./src/set-static-token');
 const createCollections = require('./src/collections/collections');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
 (async () => {
-    // Default Directus collections & schema
-    // await createCollections();
+    /*
+        Set static token, default schema & load example data
+     */
+    await setStaticToken();
+    await createCollections();
 
     const init = async () => {
         const app = express();
@@ -37,13 +40,9 @@ const errorHandler = require('./src/error-handler');
 
         if (process.env.SENTRY_DSN) {
             Sentry.init({
-                dsn: process.env.SENTRY_DSN,
-                integrations: [
-                    new Sentry.Integrations.Http({ tracing: true }),
-                    new Tracing.Integrations.Express({ app }),
-                ],
-                tracesSampleRate: 1.0,
+                dsn: process.env.SENTRY_DSN
             });
+            app.use(Sentry.Handlers.requestHandler());
         }
 
         if (!!+process.env.EXPRESS_GZIP) {
@@ -67,11 +66,23 @@ const errorHandler = require('./src/error-handler');
             }));
         }
 
-        app.use(express.static('public'));
-        app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-        app.post('/ads', controller.getAds);
+        if (process.env.NODE_ENV === 'development') {
+            app.use(express.static('public'));
+        }
 
-        app.use(Sentry.Handlers.errorHandler());
+        app.get(`'/ads.js'}`, (req, res) => {
+            res.sendFile('dist/ads.min.js', { root: './public' });
+        });
+        app.get('/robots.txt', (req, res) => {
+            res.sendFile('robots.txt', { root: './public' });
+        });
+
+        app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
+        app.get('/ads', controller.getAds);
+
+        if (process.env.SENTRY_DSN) {
+            app.use(Sentry.Handlers.errorHandler());
+        }
         app.use(errorHandler);
 
         app.listen(process.env.EXPRESS_PORT, () => {

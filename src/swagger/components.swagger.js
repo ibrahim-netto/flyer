@@ -46,7 +46,7 @@ module.exports = {
                 example: {
                     value: -300,
                     msg: 'Invalid value',
-                    param: 'lat',
+                    param: 'href',
                     location: 'query'
                 }
             }

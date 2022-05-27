@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack --env=development",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack --env=production",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
   },
   "repository": {
     "type": "git",
@@ -30,7 +34,17 @@
     "express-winston": "^4.2.0",
     "helmet": "^5.0.2",
     "lodash": "^4.17.21",
+    "node-fetch": "^2.6.7",
     "swagger-ui-express": "^4.4.0",
     "winston": "^3.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/plugin-transform-runtime": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "babel-loader": "^8.2.5",
+    "vuepress": "^2.0.0-beta.46",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.9.2"
   }
 }

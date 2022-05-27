@@ -14,9 +14,7 @@ _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 module.exports.getAds = async (req, res, next) => {
     try {
-        const { body } = req;
-
-        if (!validateGetAdsEndpoint(body)) {
+        if (!validateGetAdsEndpoint(req.query)) {
             res.status(422).json({
                 status: 'error',
                 message: 'Schema validation error',
@@ -33,9 +31,9 @@ module.exports.getAds = async (req, res, next) => {
         const query = {
             filter: {
                 placement: {
-                    _in: [body.placements]
+                    _in: Array.isArray(req.query.placements) ? req.query.placements : [req.query.placements]
                 },
-                language: body.language
+                language: req.query.language
             },
             fields: [
                 'id',
