@@ -79,7 +79,7 @@ module.exports = async () => {
             Latest Directus Javascript SDK doesn't have any methods for creating new collections
             So we have to fallback to HTTP requests
          */
-        await fetch(`${process.env.DIRECTUS_PUBLIC_URL}/collections`, {
+        await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/collections`, {
             method: 'post',
             headers,
             body: JSON.stringify(body),
@@ -133,7 +133,7 @@ module.exports = async () => {
             fields
         };
 
-        await fetch(`${process.env.DIRECTUS_PUBLIC_URL}/collections`, {
+        await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/collections`, {
             method: 'post',
             headers,
             body: JSON.stringify(body),
@@ -153,7 +153,7 @@ module.exports = async () => {
             schema: { 'on_delete': 'NO ACTION' }
         }
 
-        await fetch(`${process.env.DIRECTUS_PUBLIC_URL}/relations`, {
+        await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/relations`, {
             method: 'post',
             headers,
             body: JSON.stringify(relation),
