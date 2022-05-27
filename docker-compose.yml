@@ -33,7 +33,7 @@ services:
       - redis
       - postgres
     ports:
-      - "${DIRECTUS_PORT}:${DIRECTUS_PORT}"
+      - "${DIRECTUS_LISTEN}:8055"
     volumes:
       - ./uploads:/directus/uploads
     environment:
@@ -51,7 +51,6 @@ services:
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
-      PORT: ${DIRECTUS_PORT}
     logging:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE}
@@ -71,7 +70,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${EXPRESS_PORT}:${EXPRESS_PORT}"
+      - "${EXPRESS_LISTEN}:3000"
     logging:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE}

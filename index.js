@@ -19,6 +19,8 @@ const createCollections = require('./src/collections/collections');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
+const { EXPRESS_PORT } = require('./src/constants');
+
 (async () => {
     /*
         Set static token, default schema & load example data
@@ -85,8 +87,8 @@ const errorHandler = require('./src/error-handler');
         }
         app.use(errorHandler);
 
-        app.listen(process.env.EXPRESS_PORT, () => {
-            logger.info(`Express app listening on port ${process.env.EXPRESS_PORT}`);
+        app.listen(EXPRESS_PORT, () => {
+            logger.info(`Express app listening on port ${EXPRESS_PORT}`);
         });
     };
 
