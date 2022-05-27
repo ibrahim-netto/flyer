@@ -55,3 +55,23 @@ services:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE}
         max-file: ${DOCKER_LOG_MAX_FILE}
+
+  node:
+    build: .
+    depends_on:
+      - directus
+    restart: unless-stopped
+    hostname: node
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules/
+    working_dir: /app
+    command: node ./index.js
+    env_file:
+      - .env
+    ports:
+      - "${EXPRESS_PORT}:${EXPRESS_PORT}"
+    logging:
+      options:
+        max-size: ${DOCKER_LOG_MAX_SIZE}
+        max-file: ${DOCKER_LOG_MAX_FILE}
