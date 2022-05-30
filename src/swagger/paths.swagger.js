@@ -1,6 +1,6 @@
 module.exports = {
     paths: {
-        '/ads': {
+        '/api/ads': {
             get: {
                 description: 'Request ads.',
                 operationId: 'requestAds',
