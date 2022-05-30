@@ -4,7 +4,7 @@
     const script = document.currentScript;
     const attr = script.getAttribute.bind(script);
 
-    const serverUrl = attr('data-server-url') || `${location.origin}/ads`; // default value
+    const serverUrl = attr('data-server-url') || `${location.origin}`; // default value
     const adsPlacement = attr('data-ads-placement') || 'ads'; // default value
 
     const init = async () => {
@@ -19,7 +19,7 @@
         for (const placement of placements) {
             params.append('placements', placement);
         }
-        const url = new URL(serverUrl);
+        const url = new URL(`${serverUrl}/api/ads`);
         url.search = params;
 
         const { data: ads } = await fetch(url, {

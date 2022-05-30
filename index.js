@@ -82,7 +82,7 @@ const { EXPRESS_PORT } = require('./src/constants');
         });
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-        app.get('/ads', controller.getAds);
+        app.get('/api/ads', controller.getAds);
 
         if (process.env.SENTRY_DSN) {
             app.use(Sentry.Handlers.errorHandler());

@@ -64,7 +64,7 @@ services:
     hostname: node
     volumes:
       - .:/app
-      - node_modules:/app/node_modules/
+      - /app/node_modules/
     working_dir: /app
     command: node ./index.js
     env_file:
@@ -75,6 +75,3 @@ services:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE}
         max-file: ${DOCKER_LOG_MAX_FILE}
-
-volumes:
-  node_modules:
