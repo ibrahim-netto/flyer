@@ -14,8 +14,8 @@ module.exports = async () => {
             directusReady = true;
         } catch {
             logger.info('Directus not ready, waiting...');
+            await delay(CHECK_DIRECTUS_INTERVAL);
         }
-        await delay(CHECK_DIRECTUS_INTERVAL);
     }
 
     logger.info('Directus ready');

@@ -1,16 +1,9 @@
-const _ = require('lodash');
+const Handlebars = require('handlebars');
 const directus = require('./directus');
 const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 
 const { ADS_COLLECTION } = require('./constants');
-
-/*
-    const compiled = _.template('hello {{ user }}!');
-    compiled({ 'user': 'mustache' });
-    => 'hello mustache!'
- */
-_.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 module.exports.getAds = async (req, res, next) => {
     try {
@@ -43,12 +36,12 @@ module.exports.getAds = async (req, res, next) => {
                 'placeholder.html',
                 'variables'
             ]
-        }
+        };
         const { data: ads } = await directus.items(ADS_COLLECTION)
             .readByQuery(query);
 
         ads.forEach(ad => {
-            const template = _.template(ad.placeholder.html);
+            const template = Handlebars.compile(ad.placeholder.html);
             const values = Object.fromEntries(ad.variables.map(v => [v.key, v.value]));
             ad.placeholder.html = template(values);
 
