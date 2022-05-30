@@ -1,7 +1,7 @@
 const components = require('./components.swagger');
 const paths = require('./paths.swagger');
 
-const { VERSION } = require('../constants');
+const { VERSION, EXPRESS_PORT } = require('../constants');
 
 const options = {
     openapi: '3.0.0',
@@ -22,7 +22,7 @@ const options = {
     consumes: ['application/json'],
     produces: ['application/json'],
     servers: [ {
-        url: `http://localhost:${process.env.EXPRESS_PORT}`,
+        url: `http://localhost:${EXPRESS_PORT}`,
         description: 'Local server'
     }],
     tags: {},
