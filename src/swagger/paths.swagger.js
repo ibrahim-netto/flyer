@@ -1,6 +1,8 @@
+const { ENDPOINT_NAME } = require('../constants');
+
 module.exports = {
     paths: {
-        '/api/ads': {
+        [`/api/${ENDPOINT_NAME}`]: {
             get: {
                 description: 'Request ads.',
                 operationId: 'requestAds',

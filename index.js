@@ -20,7 +20,7 @@ const createCollections = require('./src/collections/collections');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
-const { EXPRESS_PORT } = require('./src/constants');
+const { EXPRESS_PORT, ENDPOINT_NAME } = require('./src/constants');
 
 (async () => {
     /*
@@ -82,7 +82,7 @@ const { EXPRESS_PORT } = require('./src/constants');
         });
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-        app.get('/api/ads', controller.getAds);
+        app.get(`/api/${ENDPOINT_NAME}`, controller.getAds);
 
         if (process.env.SENTRY_DSN) {
             app.use(Sentry.Handlers.errorHandler());

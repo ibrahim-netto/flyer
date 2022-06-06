@@ -1,11 +1,13 @@
 const path = require('path');
 
+const { CLIENT_FILE_NAME } = require('./src/constants');
+
 const dev = {
     mode: 'development',
     devtool: 'source-map',
     watch: true,
     entry: {
-        'ads': path.resolve(__dirname, 'src/client/ads.client.js')
+        [CLIENT_FILE_NAME]: path.resolve(__dirname, 'src/client/ads.client.js')
     },
     output: {
         filename: '[name].js',
@@ -19,7 +21,7 @@ const prod = {
     devtool: false,
     watch: false,
     entry: {
-        'ads.min': path.resolve(__dirname, 'src/client/ads.client.js')
+        [`${CLIENT_FILE_NAME}.min`]: path.resolve(__dirname, 'src/client/ads.client.js')
     },
     module: {
         rules: [
