@@ -291,7 +291,7 @@ process.umask = function() { return 0; };
 "use strict";
 
 
-const { ENDPOINT_NAME } = __webpack_require__(/*! ../constants */ "./src/constants.js");
+const ENDPOINT_NAME = __webpack_require__(/*! ../constants */ "./src/constants.js").ENDPOINT_NAME;
 
 (() => {
     const script = document.currentScript;
@@ -333,9 +333,15 @@ const { ENDPOINT_NAME } = __webpack_require__(/*! ../constants */ "./src/constan
         }
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'complete' ||
+        document.readyState === 'loaded' ||
+        document.readyState === 'interactive') {
         init();
-    });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+    }
 })();
 
 /***/ }),

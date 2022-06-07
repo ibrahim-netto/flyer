@@ -1,6 +1,6 @@
 'use strict';
 
-const { ENDPOINT_NAME } = require('../constants');
+const ENDPOINT_NAME = require('../constants').ENDPOINT_NAME;
 
 (() => {
     const script = document.currentScript;
@@ -42,7 +42,13 @@ const { ENDPOINT_NAME } = require('../constants');
         }
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'complete' ||
+        document.readyState === 'loaded' ||
+        document.readyState === 'interactive') {
         init();
-    });
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+    }
 })();
