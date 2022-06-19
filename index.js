@@ -16,11 +16,12 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerOptions = require('./src/swagger/options.swagger');
 const checkDirectus = require('./src/check-directus');
 const setStaticToken = require('./src/set-static-token');
-const createCollections = require('./src/collections/collections');
+const applySchema = require('./src/schemas/directus/schema');
+const postgreTriggers = require('./src/postgre-triggers');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
-const { EXPRESS_PORT, ENDPOINT_NAME } = require('./src/constants');
+const { EXPRESS_PORT, ENDPOINT_NAME, CLIENT_FILE_NAME } = require('./src/constants');
 
 (async () => {
     /*
@@ -28,7 +29,8 @@ const { EXPRESS_PORT, ENDPOINT_NAME } = require('./src/constants');
      */
     await checkDirectus();
     await setStaticToken();
-    await createCollections();
+    await applySchema();
+    // await postgreTriggers();
 
     const init = async () => {
         const app = express();
@@ -74,15 +76,16 @@ const { EXPRESS_PORT, ENDPOINT_NAME } = require('./src/constants');
             app.use(express.static('public'));
         }
 
-        app.get(`'/ads.js'}`, (req, res) => {
-            res.sendFile('dist/ads.min.js', { root: './public' });
+        app.get(`/${CLIENT_FILE_NAME}.js`, (req, res) => {
+            res.sendFile(`dist/${CLIENT_FILE_NAME}.min.js`, { root: './public' });
         });
         app.get('/robots.txt', (req, res) => {
             res.sendFile('robots.txt', { root: './public' });
         });
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-        app.get(`/api/${ENDPOINT_NAME}`, controller.getAds);
+
+        app.post(`/api/v1/${ENDPOINT_NAME}`, controller.getAds);
 
         if (process.env.SENTRY_DSN) {
             app.use(Sentry.Handlers.errorHandler());

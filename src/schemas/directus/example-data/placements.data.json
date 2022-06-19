@@ -1,0 +1,10 @@
+[
+  {
+    "name": "default-top",
+    "description": "Default top placement description."
+  },
+  {
+    "name": "default-bottom",
+    "description": "Default bottom placement description."
+  }
+]

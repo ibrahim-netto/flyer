@@ -1,0 +1,13 @@
+[
+  {
+    "name": "default-template",
+    "description": "Default template description.",
+    "variables": [
+      {
+        "key": "title",
+        "description": "Default template title."
+      }
+    ],
+    "html": "<div><h1>{{title}}</h1></div>"
+  }
+]

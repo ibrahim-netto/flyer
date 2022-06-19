@@ -1,0 +1,28 @@
+[
+  {
+    "name": "default-top-ad",
+    "status": "published",
+    "description": "Default Top Ad description.",
+    "placement": 1,
+    "template": 1,
+    "variables": [
+      {
+        "key": "title",
+        "value": "Default Top Ad Title"
+      }
+    ]
+  },
+  {
+    "name": "default-bottom-ad",
+    "status": "draft",
+    "description": "Default Bottom Ad description.",
+    "placement": 2,
+    "template": 1,
+    "variables": [
+      {
+        "key": "title",
+        "value": "Default Bottom Ad Title"
+      }
+    ]
+  }
+]
