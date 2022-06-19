@@ -30,7 +30,7 @@ const { EXPRESS_PORT, ENDPOINT_NAME, CLIENT_FILE_NAME } = require('./src/constan
     await checkDirectus();
     await setStaticToken();
     await applySchema();
-    // await postgreTriggers();
+    await postgreTriggers();
 
     const init = async () => {
         const app = express();
