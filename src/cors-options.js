@@ -18,6 +18,7 @@ const allowedOrigins = process.env.EXPRESS_ALLOWED_ORIGINS
 
 module.exports = {
     origin: allowedOrigins,
+    credentials: true,
     optionsSuccessStatus: 200,
-    methods: ['GET', 'OPTION']
+    methods: ['GET', 'POST', 'OPTION']
 };

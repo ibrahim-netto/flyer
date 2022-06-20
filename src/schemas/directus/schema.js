@@ -88,7 +88,7 @@ module.exports = async () => {
     await setCollectionLayoutColumnsOrder(PLACEMENTS_COLLECTION, ['name', 'description'], userId);
     await setCollectionLayoutColumnsOrder(TEMPLATES_COLLECTION, ['name', 'variables', 'html'], userId);
     await setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'ad.placement.name', 'variables'], userId);
-    await setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'url', 'ip'], userId);
+    await setCollectionLayoutColumnsOrder(CLICKS_COLLECTION, ['ad.name', 'url', 'ip'], userId);
 
     /*
         Load example data
