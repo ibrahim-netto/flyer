@@ -618,6 +618,7 @@ async function createClicksCollection(clicksCollectionName) {
                 is_nullable: false
             },
             meta: {
+                readonly: true,
                 interface: 'select-dropdown-m2o',
                 special: ['m2o'],
                 required: true,
@@ -632,6 +633,7 @@ async function createClicksCollection(clicksCollectionName) {
                 is_nullable: false
             },
             meta: {
+                readonly: true,
                 interface: 'input',
                 special: null,
                 required: true,
@@ -647,6 +649,7 @@ async function createClicksCollection(clicksCollectionName) {
                 is_nullable: true
             },
             meta: {
+                readonly: true,
                 interface: 'input',
                 special: null,
                 required: false,
@@ -662,6 +665,7 @@ async function createClicksCollection(clicksCollectionName) {
                 is_nullable: false
             },
             meta: {
+                readonly: true,
                 interface: 'input',
                 special: null,
                 required: true,
@@ -677,6 +681,7 @@ async function createClicksCollection(clicksCollectionName) {
                 is_nullable: false
             },
             meta: {
+                readonly: true,
                 interface: 'input',
                 special: null,
                 required: true,
