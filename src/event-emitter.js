@@ -18,7 +18,8 @@ eventEmitter.on('new_user', async user => {
         setCollectionLayoutColumnsOrder(ADS_COLLECTION, ['name', 'status', 'placement.name', 'template.name'], user.id),
         setCollectionLayoutColumnsOrder(PLACEMENTS_COLLECTION, ['name', 'description'], user.id),
         setCollectionLayoutColumnsOrder(TEMPLATES_COLLECTION, ['name', 'variables', 'html'], user.id),
-        setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'ad.placement.name', 'variables'], user.id)
+        setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'ad.placement.name', 'variables'], user.id),
+        setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'url', 'ip'], user.id)
     ]);
 });
 

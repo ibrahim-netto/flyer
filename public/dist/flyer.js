@@ -750,7 +750,7 @@ module.exports = JSON.parse("{\"name\":\"virail-adserver\",\"version\":\"1.0.0\"
 
 
 const camelCase = __webpack_require__(/*! lodash.camelcase */ "./node_modules/lodash.camelcase/index.js");
-const ENDPOINT_NAME = __webpack_require__(/*! ../constants */ "./src/constants.js").ENDPOINT_NAME;
+const { ENDPOINT_VERSION, ENDPOINT_NAME } = __webpack_require__(/*! ../constants */ "./src/constants.js");
 
 (() => {
     const script = document.currentScript;
@@ -759,6 +759,35 @@ const ENDPOINT_NAME = __webpack_require__(/*! ../constants */ "./src/constants.j
     const serverUrl = attr('data-server-url') || `${location.origin}`; // default value
     const placementAttr = `${ENDPOINT_NAME}-placement`;
     const filtersAttr = `${ENDPOINT_NAME}-filters`;
+
+    const onNodeClick = (ad) => {
+        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/click`;
+
+        return async () => {
+            const body = {
+                ad: {
+                    id: ad.id,
+                    name: ad.name,
+                    placement: ad.placement
+                },
+                url: location.href,
+                referrer: document.referrer
+            };
+
+            const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+            /*
+                A problem with sending analytics is that a site often wants to send analytics when the user
+                has finished with a page: for example, when the user navigates to another page. In this situation
+                the browser may be about to unload the page, and in that case the browser may choose not to send
+                asynchronous XMLHttpRequest requests.
+            */
+            const queued = navigator.sendBeacon(url, blob);
+
+            return (queued)
+                ? { status: 'success', event_id: 'sendBeacon' }
+                : { status: 'error', message: 'User agent failed to queue the data transfer' };
+        }
+    };
 
     const init = async () => {
         // Convert NodeList to Array
@@ -786,7 +815,7 @@ const ENDPOINT_NAME = __webpack_require__(/*! ../constants */ "./src/constants.j
             placements
         };
 
-        const url = new URL(`${serverUrl}/api/v1/${ENDPOINT_NAME}`);
+        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`;
 
         const { data } = await fetch(url, {
             method: 'post',
@@ -801,6 +830,7 @@ const ENDPOINT_NAME = __webpack_require__(/*! ../constants */ "./src/constants.j
 
             if (node) {
                 node.innerHTML = entry.html;
+                node.addEventListener('click', onNodeClick(entry), true);
             }
         }
     };
@@ -837,6 +867,7 @@ module.exports.CHECK_DIRECTUS_INTERVAL = 1000 * 10;
     Initially, ENDPOINT_NAME and CLIENT_FILE_NAME wasn't options to be set, and the default value was 'ads'.
     But to avoid adBlockers, now these two variables can be set to any value.
  */
+module.exports.ENDPOINT_VERSION = 'v1';
 module.exports.ENDPOINT_NAME = 'flyer';
 module.exports.CLIENT_FILE_NAME = 'flyer';
 
@@ -844,6 +875,7 @@ module.exports.ADS_COLLECTION = 'ads';
 module.exports.PLACEMENTS_COLLECTION = 'placements';
 module.exports.TEMPLATES_COLLECTION = 'templates';
 module.exports.FILTERS_COLLECTION = 'filters';
+module.exports.CLICKS_COLLECTION = 'clicks';
 
 /***/ })
 

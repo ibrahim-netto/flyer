@@ -4,6 +4,9 @@ const logger = require('./logger');
 
 const { CHECK_DIRECTUS_INTERVAL } = require('./constants');
 
+/*
+    @TODO implement healthcheck on docker-compose file
+ */
 module.exports = async () => {
     let directusReady = false;
 

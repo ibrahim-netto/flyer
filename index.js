@@ -21,7 +21,12 @@ const postgreTriggers = require('./src/postgre-triggers');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
-const { EXPRESS_PORT, ENDPOINT_NAME, CLIENT_FILE_NAME } = require('./src/constants');
+const {
+    EXPRESS_PORT,
+    ENDPOINT_VERSION,
+    ENDPOINT_NAME,
+    CLIENT_FILE_NAME
+} = require('./src/constants');
 
 (async () => {
     /*
@@ -39,9 +44,19 @@ const { EXPRESS_PORT, ENDPOINT_NAME, CLIENT_FILE_NAME } = require('./src/constan
 
         app.use(expressWinston.logger({
             winstonInstance: logger,
-            meta: false,
             expressFormat: true,
-            colorize: true
+            colorize: true,
+            meta: true,
+            metaField: null,
+            dynamicMeta: (req) => {
+                const meta = {};
+
+                if (req) {
+                    meta.ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.ip
+                }
+
+                return meta;
+            }
         }));
 
         if (process.env.SENTRY_DSN) {
@@ -85,7 +100,8 @@ const { EXPRESS_PORT, ENDPOINT_NAME, CLIENT_FILE_NAME } = require('./src/constan
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
-        app.post(`/api/v1/${ENDPOINT_NAME}`, controller.getAds);
+        app.post(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`, controller.getAds);
+        app.post(`/api/${ENDPOINT_VERSION}/click`, controller.adClick);
 
         if (process.env.SENTRY_DSN) {
             app.use(Sentry.Handlers.errorHandler());

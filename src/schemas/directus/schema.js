@@ -17,7 +17,8 @@ const {
     ADS_COLLECTION,
     PLACEMENTS_COLLECTION,
     TEMPLATES_COLLECTION,
-    FILTERS_COLLECTION
+    FILTERS_COLLECTION,
+    CLICKS_COLLECTION
 } = require('../../constants');
 
 module.exports = async () => {
@@ -29,6 +30,7 @@ module.exports = async () => {
         return;
     }
 
+    // await directus.collections.deleteOne(CLICKS_COLLECTION);
     // await directus.collections.deleteOne(FILTERS_COLLECTION);
     // await directus.collections.deleteOne(ADS_COLLECTION);
     // await directus.collections.deleteOne(PLACEMENTS_COLLECTION);
@@ -50,6 +52,7 @@ module.exports = async () => {
     await createPlacementsCollection(PLACEMENTS_COLLECTION);
     await createTemplatesCollection(TEMPLATES_COLLECTION);
     await createFiltersCollection(FILTERS_COLLECTION);
+    await createClicksCollection(CLICKS_COLLECTION);
 
     /*
         Set relations
@@ -58,6 +61,7 @@ module.exports = async () => {
     await setRelation(ADS_COLLECTION, 'placement', PLACEMENTS_COLLECTION);
     await setRelation(ADS_COLLECTION, 'template', TEMPLATES_COLLECTION);
     await setRelation(FILTERS_COLLECTION, 'ad', ADS_COLLECTION);
+    await setRelation(CLICKS_COLLECTION, 'ad', ADS_COLLECTION);
 
     await setRelation(TEMPLATES_COLLECTION, 'preview', 'directus_files');
 
@@ -65,7 +69,8 @@ module.exports = async () => {
         ADS_COLLECTION,
         PLACEMENTS_COLLECTION,
         TEMPLATES_COLLECTION,
-        FILTERS_COLLECTION
+        FILTERS_COLLECTION,
+        CLICKS_COLLECTION
     ];
 
     for (const collection of collections) {
@@ -83,6 +88,7 @@ module.exports = async () => {
     await setCollectionLayoutColumnsOrder(PLACEMENTS_COLLECTION, ['name', 'description'], userId);
     await setCollectionLayoutColumnsOrder(TEMPLATES_COLLECTION, ['name', 'variables', 'html'], userId);
     await setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'ad.placement.name', 'variables'], userId);
+    await setCollectionLayoutColumnsOrder(FILTERS_COLLECTION, ['ad.name', 'url', 'ip'], userId);
 
     /*
         Load example data
@@ -275,6 +281,22 @@ async function createAdsCollection(adsCollectionName) {
                 display_options: {
                     format: '{{key}} => {{value}}'
                 }
+            }
+        }, {
+            field: 'click_count',
+            type: 'integer',
+            schema: {
+                is_nullable: false,
+                default_value: 0
+            },
+            meta: {
+                interface: 'input',
+                required: true,
+                readonly: true,
+                display: 'related-values',
+                display_options: {
+                    template: '{{name}}'
+                },
             }
         },
             ...metadataFields
@@ -566,6 +588,112 @@ async function createFiltersCollection(filtersCollectionName) {
         meta: {
             singleton: false,
             sort: 4
+        }
+    };
+
+    return directus.collections.createOne(collection);
+}
+
+async function createClicksCollection(clicksCollectionName) {
+    const collection = {
+        collection: clicksCollectionName,
+        fields: [{
+            field: 'id',
+            type: 'integer',
+            schema: {
+                is_primary_key: true,
+                has_auto_increment: true
+            },
+            meta: {
+                hidden: true,
+                readonly: true,
+                interface: 'input',
+                special: null,
+                required: true
+            }
+        }, {
+            field: 'ad',
+            type: 'integer',
+            schema: {
+                is_nullable: false
+            },
+            meta: {
+                interface: 'select-dropdown-m2o',
+                special: ['m2o'],
+                required: true,
+                options: {
+                    template: '{{name}}'
+                }
+            }
+        }, {
+            field: 'url',
+            type: 'string',
+            schema: {
+                is_nullable: false
+            },
+            meta: {
+                interface: 'input',
+                special: null,
+                required: true,
+                options: {
+                    trim: true
+                },
+                display: 'formatted-value'
+            }
+        }, {
+            field: 'referrer',
+            type: 'string',
+            schema: {
+                is_nullable: true
+            },
+            meta: {
+                interface: 'input',
+                special: null,
+                required: false,
+                options: {
+                    trim: true
+                },
+                display: 'formatted-value'
+            }
+        }, {
+            field: 'userAgent',
+            type: 'string',
+            schema: {
+                is_nullable: false
+            },
+            meta: {
+                interface: 'input',
+                special: null,
+                required: true,
+                options: {
+                    trim: true
+                },
+                display: 'formatted-value'
+            }
+        }, {
+            field: 'ip',
+            type: 'string',
+            schema: {
+                is_nullable: false
+            },
+            meta: {
+                interface: 'input',
+                special: null,
+                required: true,
+                options: {
+                    trim: true
+                },
+                display: 'formatted-value'
+            }
+        },
+            ...metadataFields
+        ],
+        schema: {
+            is_nullable: false
+        },
+        meta: {
+            singleton: false,
+            sort: 5
         }
     };
 

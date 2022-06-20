@@ -1,7 +1,7 @@
 'use strict';
 
 const camelCase = require('lodash.camelcase');
-const ENDPOINT_NAME = require('../constants').ENDPOINT_NAME;
+const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
 
 (() => {
     const script = document.currentScript;
@@ -10,6 +10,35 @@ const ENDPOINT_NAME = require('../constants').ENDPOINT_NAME;
     const serverUrl = attr('data-server-url') || `${location.origin}`; // default value
     const placementAttr = `${ENDPOINT_NAME}-placement`;
     const filtersAttr = `${ENDPOINT_NAME}-filters`;
+
+    const onNodeClick = (ad) => {
+        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/click`;
+
+        return async () => {
+            const body = {
+                ad: {
+                    id: ad.id,
+                    name: ad.name,
+                    placement: ad.placement
+                },
+                url: location.href,
+                referrer: document.referrer
+            };
+
+            const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+            /*
+                A problem with sending analytics is that a site often wants to send analytics when the user
+                has finished with a page: for example, when the user navigates to another page. In this situation
+                the browser may be about to unload the page, and in that case the browser may choose not to send
+                asynchronous XMLHttpRequest requests.
+            */
+            const queued = navigator.sendBeacon(url, blob);
+
+            return (queued)
+                ? { status: 'success', event_id: 'sendBeacon' }
+                : { status: 'error', message: 'User agent failed to queue the data transfer' };
+        }
+    };
 
     const init = async () => {
         // Convert NodeList to Array
@@ -37,7 +66,7 @@ const ENDPOINT_NAME = require('../constants').ENDPOINT_NAME;
             placements
         };
 
-        const url = new URL(`${serverUrl}/api/v1/${ENDPOINT_NAME}`);
+        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`;
 
         const { data } = await fetch(url, {
             method: 'post',
@@ -52,6 +81,7 @@ const ENDPOINT_NAME = require('../constants').ENDPOINT_NAME;
 
             if (node) {
                 node.innerHTML = entry.html;
+                node.addEventListener('click', onNodeClick(entry), true);
             }
         }
     };

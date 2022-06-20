@@ -1,10 +1,15 @@
 const _ = require('lodash');
 const Handlebars = require('handlebars');
+const postgrePool = require('./postgre-pool');
 const directus = require('./directus');
 const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 
-const { ADS_COLLECTION, FILTERS_COLLECTION } = require('./constants');
+const {
+    ADS_COLLECTION,
+    FILTERS_COLLECTION,
+    CLICKS_COLLECTION
+} = require('./constants');
 
 module.exports.getAds = async (req, res, next) => {
     try {
@@ -127,12 +132,58 @@ module.exports.getAds = async (req, res, next) => {
                 const html = template(values);
 
                 return {
+                    id: ad.id,
+                    name: ad.name,
                     placement: ad.placement.name,
                     html
                 }
             });
 
         res.json({ status: 'success', data });
+    } catch (err) {
+        next(err);
+    }
+}
+
+/*
+    {"field":"click_count","type":"integer","schema":{"default_value":"0"},"meta":{"interface":"input","special":null,"readonly":true},"collection":"ads"}
+ */
+
+module.exports.adClick = async (req, res, next) => {
+    try {
+        const { ad, url, referrer } = req.body;
+
+        const doc = await directus.items(ADS_COLLECTION).readOne(ad.id, {
+            fields: ['id']
+        });
+        if (!doc) {
+            res.code(404).json({ status: 'error', message: 'Resource not found' });
+            return;
+        }
+
+        /*
+            Using postgree client to use transactions for count increment
+         */
+        const postgreClient = await postgrePool.connect();
+        const query = `
+            UPDATE ${ADS_COLLECTION}
+            SET click_count = click_count + 1
+            WHERE id = ${ad.id};
+        `;
+        await postgreClient.query(query);
+
+        /*
+            Insert entry on 'clicks' collection
+         */
+        await directus.items(CLICKS_COLLECTION).createOne({
+            ad: ad.id,
+            url,
+            referrer,
+            userAgent: req.headers['user-agent'],
+            ip: req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.ip
+        });
+
+        res.json({ status: 'success' });
     } catch (err) {
         next(err);
     }
