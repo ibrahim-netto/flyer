@@ -2,51 +2,67 @@ const { ENDPOINT_NAME } = require('../constants');
 
 module.exports = {
     paths: {
-        [`/api/${ENDPOINT_NAME}`]: {
-            get: {
-                description: 'Request ads.',
+        [`/api/v1/${ENDPOINT_NAME}`]: {
+            post: {
                 operationId: 'requestAds',
-                parameters: [{
-                    name: 'href',
-                    in: 'query',
-                    schema: {
-                        type: 'string',
-                        maxLength: 200,
-                        example: 'https://www.virail.com'
-                    },
-                    description: 'Page href.',
-                    required: true
-                }, {
-                    name: 'language',
-                    in: 'query',
-                    schema: {
-                        type: 'string',
-                        maxLength: 20,
-                        example: 'en-US'
-                    },
-                    description: 'Ad language.'
-                }, {
-                    name: 'placements',
-                    in: 'query',
-                    schema: {
-                        type: 'array',
-                        minItems: 1,
-                        maxItems: 100,
-                        items: {
-                            type: 'string',
-                            maxLength: 200
-                        },
-                        example: ['default-top']
-                    },
-                    description: 'Ad placement.'
-                }],
+                description: 'Request ads.',
+                parameters: [],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/requestBodies/RequestAds'
+                            }
+                        }
+                    }
+                },
                 responses: {
                     '200': {
-                        description: 'Ads request result.',
+                        description: 'Request ads result.',
                         content: {
                             'application/json': {
                                 schema: {
-                                    $ref: '#/components/responses/AdsRequest'
+                                    $ref: '#/components/responses/RequestAds'
+                                }
+                            }
+                        }
+                    },
+                    '422': {
+                        description: 'Validation error.',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/responses/Error'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        '/api/v1/click': {
+            post: {
+                operationId: 'adClick',
+                description: 'Ad click.',
+                parameters: [],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/requestBodies/AdClick'
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '200': {
+                        description: 'Ad click result.',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/responses/AdClick'
                                 }
                             }
                         }

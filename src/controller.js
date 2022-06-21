@@ -4,6 +4,7 @@ const postgrePool = require('./postgre-pool');
 const directus = require('./directus');
 const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
+const validateAdClickEndpoint = validator.getSchema('ad-click');
 
 const {
     ADS_COLLECTION,
@@ -145,12 +146,17 @@ module.exports.getAds = async (req, res, next) => {
     }
 }
 
-/*
-    {"field":"click_count","type":"integer","schema":{"default_value":"0"},"meta":{"interface":"input","special":null,"readonly":true},"collection":"ads"}
- */
-
 module.exports.adClick = async (req, res, next) => {
     try {
+        if (!validateAdClickEndpoint(req.body)) {
+            res.status(422).json({
+                status: 'error',
+                message: 'Schema validation error',
+                errors: validateGetAdsEndpoint.errors
+            });
+            return;
+        }
+
         const { ad, url, referrer } = req.body;
 
         const doc = await directus.items(ADS_COLLECTION).readOne(ad.id, {

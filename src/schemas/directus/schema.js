@@ -1,7 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
 const directus = require('../../directus');
-const fetch = require('node-fetch');
 const logger = require('../../logger');
 const { setCollectionLayoutColumnsOrder } = require('../../utils');
 const metadataFields = require('./metadata.fields');
@@ -691,7 +690,8 @@ async function createClicksCollection(clicksCollectionName) {
                 display: 'formatted-value'
             }
         },
-            ...metadataFields
+            metadataFields.find(v => v.field === 'user_created'),
+            metadataFields.find(v => v.field === 'date_created')
         ],
         schema: {
             is_nullable: false
