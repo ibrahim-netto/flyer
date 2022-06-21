@@ -1,5 +1,5 @@
 {
-  "name": "virail-adserver",
+  "name": "flyer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibrahim-netto/virail-adserver.git"
+    "url": "git+https://github.com/ibrahim-netto/flyer.git"
   },
   "author": "Ibrahim Netto <ibrahim.netto@virail.com>",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/ibrahim-netto/virail-adserver/issues"
+    "url": "https://github.com/ibrahim-netto/flyer/issues"
   },
-  "homepage": "https://github.com/ibrahim-netto/virail-adserver#readme",
+  "homepage": "https://github.com/ibrahim-netto/flyer#readme",
   "dependencies": {
     "@directus/sdk": "^9.10.0",
     "@sentry/node": "^6.19.7",
