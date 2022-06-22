@@ -68,7 +68,7 @@ module.exports = {
                 type: 'object',
                 description: 'Ad click body.',
                 properties: {
-                    ad: {
+                    placements: {
                         type: 'array',
                         description: 'Ad placements.',
                         minItems: 1,
