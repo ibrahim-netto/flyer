@@ -69,7 +69,6 @@ module.exports = async () => {
         PLACEMENTS_COLLECTION,
         TEMPLATES_COLLECTION,
         FILTERS_COLLECTION,
-        CLICKS_COLLECTION
     ];
 
     for (const collection of collections) {
@@ -78,6 +77,10 @@ module.exports = async () => {
             await setRelation(collection, 'user_updated', 'directus_users')
         ]);
     }
+    /*
+        CLICKS_COLLECTION don't have user_updated field.
+     */
+    await setRelation(CLICKS_COLLECTION, 'user_created', 'directus_users');
 
     /*
         Apply collection columns order
