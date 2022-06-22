@@ -91,7 +91,7 @@ const {
             app.use(express.static('public'));
         }
 
-        app.get(`/${CLIENT_FILE_NAME}.min.js`, (req, res) => {
+        app.get(`/dist/${CLIENT_FILE_NAME}.min.js`, (req, res) => {
             res.sendFile(`dist/${CLIENT_FILE_NAME}.min.js`, { root: './public' });
         });
         app.get('/robots.txt', (req, res) => {
