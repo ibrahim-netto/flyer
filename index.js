@@ -15,7 +15,7 @@ const swaggerHeaders = require('./src/swagger/headers.swagger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerOptions = require('./src/swagger/options.swagger');
 const checkDirectus = require('./src/check-directus');
-const setStaticToken = require('./src/set-static-token');
+const directusLogin = require('./src/directus-login');
 const applySchema = require('./src/schemas/directus/schema');
 const postgreTriggers = require('./src/postgre-triggers');
 const controller = require('./src/controller');
@@ -33,7 +33,7 @@ const {
         Set static token, default schema & load example data
      */
     await checkDirectus();
-    await setStaticToken();
+    await directusLogin();
     await applySchema();
     await postgreTriggers();
 
