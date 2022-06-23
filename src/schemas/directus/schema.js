@@ -52,6 +52,11 @@ module.exports = async () => {
     await createTemplatesCollection(TEMPLATES_COLLECTION);
     await createFiltersCollection(FILTERS_COLLECTION);
     await createClicksCollection(CLICKS_COLLECTION);
+    /*
+        @TODO createImagesCollection
+        ad: many to one
+        image: image file
+     */
 
     /*
         Set relations

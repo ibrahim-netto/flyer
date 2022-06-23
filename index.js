@@ -107,6 +107,7 @@ const {
 
         app.post(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`, controller.getAds);
         app.post(`/api/${ENDPOINT_VERSION}/click`, controller.adClick);
+        app.get(`/api/${ENDPOINT_VERSION}/images/:id`, controller.getImage);
 
         if (process.env.SENTRY_DSN) {
             app.use(Sentry.Handlers.errorHandler());

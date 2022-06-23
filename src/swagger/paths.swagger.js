@@ -79,6 +79,44 @@ module.exports = {
                     }
                 }
             }
+        },
+        '/api/v1/images/{id}': {
+            get: {
+                operationId: 'getImage',
+                description: 'Get image.',
+                parameters: [{
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'string'
+                    },
+                    required: true,
+                    description: 'ID of the image to get.'
+                }],
+                responses: {
+                    '200': {
+                        description: 'Image file.',
+                        content: {
+                            'image': {
+                                schema: {
+                                    type: 'string',
+                                    format: 'binary'
+                                }
+                            }
+                        }
+                    },
+                    '422': {
+                        description: 'Validation error.',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    $ref: '#/components/responses/Error'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

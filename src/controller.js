@@ -1,15 +1,18 @@
 const _ = require('lodash');
+const fetch = require('node-fetch');
 const Handlebars = require('handlebars');
 const postgrePool = require('./postgre-pool');
 const directus = require('./directus');
 const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 const validateAdClickEndpoint = validator.getSchema('ad-click');
+const validateGetImageEndpoint = validator.getSchema('get-image');
 
 const {
     ADS_COLLECTION,
     FILTERS_COLLECTION,
-    CLICKS_COLLECTION
+    CLICKS_COLLECTION,
+    IMAGES_COLLECTION
 } = require('./constants');
 
 module.exports.getAds = async (req, res, next) => {
@@ -152,7 +155,7 @@ module.exports.adClick = async (req, res, next) => {
             res.status(422).json({
                 status: 'error',
                 message: 'Schema validation error',
-                errors: validateGetAdsEndpoint.errors
+                errors: validateAdClickEndpoint.errors
             });
             return;
         }
@@ -190,6 +193,49 @@ module.exports.adClick = async (req, res, next) => {
         });
 
         res.json({ status: 'success' });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports.getImage = async (req, res, next) => {
+    try {
+        if (!validateGetImageEndpoint(req.params)) {
+            res.status(422).json({
+                status: 'error',
+                message: 'Schema validation error',
+                errors: validateGetImageEndpoint.errors
+            });
+            return;
+        }
+
+        const { id } = req.params;
+        /*
+            You don't have permission to access this response if image id not found (Directus behavior)
+         */
+        const doc = await directus.items(IMAGES_COLLECTION).readOne(id);
+
+        const headers = {
+            'Authorization': `Bearer ${directus.auth.token}`
+        };
+        const response = await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/assets/${doc.image}`, {
+            method: 'GET',
+            headers
+        });
+
+        if (!response.ok) throw new Error(response.statusText);
+
+        const responseHeaders = [
+            'content-type',
+            'accept-ranges',
+            'content-length'
+        ];
+        responseHeaders.forEach(header => res.set(header, response.headers.get(header)));
+
+        /*
+            Pipe stream from fecth to Express response
+         */
+        response.body.pipe(res);
     } catch (err) {
         next(err);
     }

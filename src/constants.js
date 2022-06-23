@@ -19,3 +19,4 @@ module.exports.PLACEMENTS_COLLECTION = 'placements';
 module.exports.TEMPLATES_COLLECTION = 'templates';
 module.exports.FILTERS_COLLECTION = 'filters';
 module.exports.CLICKS_COLLECTION = 'clicks';
+module.exports.IMAGES_COLLECTION = 'images';
