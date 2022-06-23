@@ -88,6 +88,10 @@ const {
             }));
         }
 
+        if (!!+process.env.EXPRESS_VARNISH_HEADERS) {
+            app.use(varnishHeaders);
+        }
+
         if (process.env.NODE_ENV === 'development') {
             app.use(express.static('public'));
         }
@@ -100,10 +104,6 @@ const {
         });
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-
-        if (!!+process.env.EXPRESS_VARNISH_HEADERS) {
-            app.use(varnishHeaders);
-        }
 
         app.post(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`, controller.getAds);
         app.post(`/api/${ENDPOINT_VERSION}/click`, controller.adClick);
