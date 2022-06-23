@@ -1,4 +1,4 @@
-backend backend_node_0 {
+backend node {
     .host = "node";
     .port = "3000";
     .connect_timeout = 3s;
@@ -8,7 +8,7 @@ backend backend_node_0 {
 
 sub vcl_init {
     new be_web = directors.round_robin();
-    be_web.add_backend(backend_node_0);
+    be_web.add_backend(node);
 }
 
 sub host_to_backend_hinting {

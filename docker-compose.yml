@@ -27,6 +27,8 @@ services:
     hostname: redis
     image: redis:6
     restart: unless-stopped
+    volumes:
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 5s
