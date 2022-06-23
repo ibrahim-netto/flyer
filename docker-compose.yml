@@ -3,6 +3,7 @@ version: "3.9"
 services:
   postgres:
     container_name: postgres
+    hostname: postgres
     image: postgis/postgis:13-master
     restart: unless-stopped
     volumes:
@@ -23,6 +24,7 @@ services:
 
   redis:
     container_name: redis
+    hostname: redis
     image: redis:6
     restart: unless-stopped
     healthcheck:
@@ -37,6 +39,7 @@ services:
 
   directus:
     container_name: directus
+    hostname: directus
     image: directus/directus:latest
     restart: unless-stopped
     depends_on:
@@ -45,7 +48,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "${DIRECTUS_LISTEN:-8055}:8055"
+      - ${DIRECTUS_LISTEN:-8055}:8055
     volumes:
       - ./uploads:/directus/uploads
     environment:
@@ -76,12 +79,13 @@ services:
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
 
   node:
+    container_name: node
+    hostname: node
     build: .
     depends_on:
       directus:
         condition: service_started
     restart: unless-stopped
-    hostname: node
     volumes:
       - .:/app
       - /app/node_modules/
@@ -90,8 +94,38 @@ services:
     env_file:
       - .env
     ports:
-      - "${EXPRESS_LISTEN:-3000}:3000"
+      - ${EXPRESS_LISTEN:-3000}:3000
     logging:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
+
+  varnish:
+    profiles: ["varnish"]
+    container_name: varnish
+    hostname: varnish
+    image: darioguarascio/varnish-elk-docker:latest
+    restart: unless-stopped
+    depends_on:
+      node:
+        condition: service_started
+    volumes:
+      - /vcache
+      - ./config/varnish/varnish_backends.vcl:/usr/share/varnish/vcl/varnish_backends.vcl
+    ports:
+      - ${VARNISH_LISTEN:-80}:80
+    environment:
+      ENV: ${ENV:-dev}
+      VARNISH_MEMORY: ${VARNISH_MEMORY:-malloc,32m}
+      VARNISH_PURGE_KEY: ${VARNISH_PURGE_KEY:-dev}
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -e /proc/`cat /varnish.pid` || (kill -s 15 -1 && (sleep 10; kill -s 9 -1))"]
+      interval: 5s
+      timeout: 1s
+      retries: 1
+      start_period: 5s
+    logging:
+      driver: syslog
+      options:
+        cache-disabled: "false"
+        syslog-address: udp://${VARNISH_LOGGER_IP:-127.0.0.1}:${VARNISH_LOGGER_PORT:-5445}

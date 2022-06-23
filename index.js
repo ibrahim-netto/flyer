@@ -18,6 +18,7 @@ const checkDirectus = require('./src/check-directus');
 const directusLogin = require('./src/directus-login');
 const applySchema = require('./src/schemas/directus/schema');
 const postgreTriggers = require('./src/postgre-triggers');
+const varnishHeaders = require('./src/varnish-headers');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
@@ -99,6 +100,10 @@ const {
         });
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
+
+        if (!!+process.env.EXPRESS_VARNISH_HEADERS) {
+            app.use(varnishHeaders);
+        }
 
         app.post(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`, controller.getAds);
         app.post(`/api/${ENDPOINT_VERSION}/click`, controller.adClick);
