@@ -117,8 +117,8 @@ services:
     ports:
       - ${VARNISH_LISTEN:-80}:80
     environment:
-      ENV: ${ENV:-dev}
-      VARNISH_MEMORY: ${VARNISH_MEMORY:-malloc,32m}
+      ENV: ${VARNISH_ENV:-dev}
+      VARNISHD_MEMORY: ${VARNISH_MEMORY:-malloc,32m}
       VARNISH_PURGE_KEY: ${VARNISH_PURGE_KEY:-dev}
     healthcheck:
       test: ["CMD", "sh", "-c", "test -e /proc/`cat /varnish.pid` || (kill -s 15 -1 && (sleep 10; kill -s 9 -1))"]
