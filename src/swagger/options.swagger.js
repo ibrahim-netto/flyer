@@ -14,7 +14,7 @@ const options = {
         },
         contact: {
             name: 'Ibrahim Netto',
-            url: 'https://www.virail.com/',
+            url: 'https://github.com/ibrahim-netto/flyer',
             email: 'ibrahim.netto@virail.com',
         },
     },
@@ -22,8 +22,7 @@ const options = {
     consumes: ['application/json'],
     produces: ['application/json'],
     servers: [ {
-        url: `http://localhost:${EXPRESS_PORT}`,
-        description: 'Local server'
+        url: process.env.EXPRESS_PUBLIC_URL
     }],
     tags: {},
     ...components,

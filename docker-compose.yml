@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   postgres:
-    container_name: postgres
+    container_name: flyer.postgres
     hostname: postgres
     image: postgis/postgis:13-master
     restart: unless-stopped
@@ -23,7 +23,7 @@ services:
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
 
   redis:
-    container_name: redis
+    container_name: flyer.redis
     hostname: redis
     image: redis:6
     restart: unless-stopped
@@ -40,7 +40,7 @@ services:
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
 
   directus:
-    container_name: directus
+    container_name: flyer.directus
     hostname: directus
     image: directus/directus:latest
     restart: unless-stopped
@@ -82,7 +82,7 @@ services:
 
   node:
     profiles: ["production"]
-    container_name: node
+    container_name: flyer.node
     hostname: node
     build: .
     depends_on:
@@ -105,7 +105,7 @@ services:
 
   varnish:
     profiles: ["production"]
-    container_name: varnish
+    container_name: flyer.varnish
     hostname: varnish
     image: darioguarascio/varnish-elk-docker:latest
     restart: unless-stopped
