@@ -87,7 +87,7 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
             if (node) {
                 const id = entry.id;
                 const href = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`;
-                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}">${entry.html}</a>`;
+                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
             }
         }
     };
