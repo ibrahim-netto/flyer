@@ -31,7 +31,7 @@ module.exports = {
                     in: 'query',
                     name: 'filters',
                     description: 'Ad filters in JSON string format.',
-                    example: `{ tld: 'it' }`,
+                    example: '{ "tld": "it" }',
                     schema: {
                         oneOf: [{
                             type: 'string',
@@ -123,7 +123,6 @@ module.exports = {
                         content: {
                             'image': {
                                 schema: {
-                                    // type: 'string',
                                     format: 'binary'
                                 }
                             }
