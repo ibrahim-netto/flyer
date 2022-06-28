@@ -8,8 +8,8 @@ module.exports.varnishProjectHeaders = (req, res, next) => {
 }
 
 module.exports.varnishCacheHeaders = (req, res, next) => {
-    res.append('X-TTL', 30);
-    res.append('X-Grace', 90);
+    res.append('X-TTL', +process.env.VARNISH_TTL_HEADER || 30);
+    res.append('X-Grace', +process.env.VARNISH_GRACE_HEADER || 90);
 
     next();
 }

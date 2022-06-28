@@ -3,20 +3,51 @@ const { ENDPOINT_NAME } = require('../constants');
 module.exports = {
     paths: {
         [`/api/v1/${ENDPOINT_NAME}`]: {
-            post: {
+            get: {
                 operationId: 'requestAds',
                 description: 'Request ads.',
-                parameters: [],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: {
-                                $ref: '#/components/requestBodies/RequestAds'
+                example: 'default-top',
+                parameters: [{
+                    in: 'query',
+                    name: 'name',
+                    description: 'Ad page placement name.',
+                    example: 'default-top',
+                    schema: {
+                        oneOf: [{
+                            type: 'string',
+                            maxLength: 200
+                        }, {
+                            type: 'array',
+                            minItems: 1,
+                            maxItems: 100,
+                            items: {
+                                type: 'string',
+                                maxLength: 200,
                             }
-                        }
-                    }
-                },
+                        }]
+                    },
+                    required: true
+                }, {
+                    in: 'query',
+                    name: 'filters',
+                    description: 'Ad filters in JSON string format.',
+                    example: `{ tld: 'it' }`,
+                    schema: {
+                        oneOf: [{
+                            type: 'string',
+                            maxLength: 2000
+                        }, {
+                            type: 'array',
+                            minItems: 1,
+                            maxItems: 100,
+                            items: {
+                                type: 'string',
+                                maxLength: 2000
+                            }
+                        }]
+                    },
+                    required: false
+                }],
                 responses: {
                     '200': {
                         description: 'Request ads result.',
@@ -41,31 +72,23 @@ module.exports = {
                 }
             }
         },
-        '/api/v1/click': {
-            post: {
+        [`/api/v1/${ENDPOINT_NAME}/{id}/click`]: {
+            get: {
                 operationId: 'adClick',
                 description: 'Ad click.',
-                parameters: [],
-                requestBody: {
-                    required: true,
-                    content: {
-                        'application/json': {
-                            schema: {
-                                $ref: '#/components/requestBodies/AdClick'
-                            }
-                        }
-                    }
-                },
+                parameters: [{
+                    in: 'path',
+                    name: 'id',
+                    description: 'Ad id.',
+                    example: '6ecd8c99-4036-403d-bf84-cf8400f67836',
+                    schema: {
+                        type: 'string'
+                    },
+                    required: true
+                }],
                 responses: {
-                    '200': {
-                        description: 'Ad click result.',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    $ref: '#/components/responses/AdClick'
-                                }
-                            }
-                        }
+                    '302': {
+                        description: 'Ad click partner redirect.'
                     },
                     '422': {
                         description: 'Validation error.',
@@ -80,18 +103,19 @@ module.exports = {
                 }
             }
         },
-        '/api/v1/images/{id}': {
+        [`/api/v1/${ENDPOINT_NAME}/{id}/image`]: {
             get: {
                 operationId: 'getImage',
                 description: 'Get image.',
                 parameters: [{
                     in: 'path',
                     name: 'id',
+                    description: 'Ad id.',
+                    example: '6ecd8c99-4036-403d-bf84-cf8400f67836',
                     schema: {
                         type: 'string'
                     },
-                    required: true,
-                    description: 'ID of the image to get.'
+                    required: true
                 }],
                 responses: {
                     '200': {
@@ -99,7 +123,7 @@ module.exports = {
                         content: {
                             'image': {
                                 schema: {
-                                    type: 'string',
+                                    // type: 'string',
                                     format: 'binary'
                                 }
                             }
