@@ -52,7 +52,7 @@ services:
     ports:
       - ${DIRECTUS_LISTEN:-8055}:8055
     volumes:
-      - ./uploads:/directus/uploads
+      - ./uploads:/directus/uploads:rw
     environment:
       KEY: ${DIRECTUS_KEY}
       SECRET: ${DIRECTUS_SECRET}
