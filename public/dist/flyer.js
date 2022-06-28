@@ -836,7 +836,7 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = __webpack_require__(/*! ../constants
             if (node) {
                 const id = entry.id;
                 const href = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`;
-                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="origin">${entry.html}</a>`;
+                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}">${entry.html}</a>`;
             }
         }
     };
