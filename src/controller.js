@@ -4,6 +4,7 @@ const Handlebars = require('handlebars');
 const postgrePool = require('./postgre-pool');
 const directus = require('./directus');
 const validator = require('./validator');
+const isbot = require('isbot');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 const validateAdClickEndpoint = validator.getSchema('ad-click');
 const validateGetImageEndpoint = validator.getSchema('get-image');
@@ -12,12 +13,13 @@ const {
     ADS_COLLECTION,
     FILTERS_COLLECTION,
     CLICKS_COLLECTION,
-    IMAGES_COLLECTION
+    ENDPOINT_VERSION,
+    ENDPOINT_NAME
 } = require('./constants');
 
 module.exports.getAds = async (req, res, next) => {
     try {
-        if (!validateGetAdsEndpoint(req.body)) {
+        if (!validateGetAdsEndpoint(req.query)) {
             res.status(422).json({
                 status: 'error',
                 message: 'Schema validation error',
@@ -25,6 +27,15 @@ module.exports.getAds = async (req, res, next) => {
             });
             return;
         }
+
+        const names = Array.isArray(req.query.name) ? req.query.name : [req.query.name];
+        const filters = Array.isArray(req.query.filters) ? req.query.filters : [req.query.filters];
+        const placements = names.map((name, i) => {
+            return {
+                name,
+                filters: filters[i] ? JSON.parse(filters[i]) : null
+            }
+        });
 
         /*
             Query to look for ads with the matching placements
@@ -36,7 +47,7 @@ module.exports.getAds = async (req, res, next) => {
                 },
                 placement: {
                     name: {
-                        _in: req.body.placements.map(entry => entry.name)
+                        _in: placements.map(entry => entry.name)
                     }
                 }
             },
@@ -66,7 +77,7 @@ module.exports.getAds = async (req, res, next) => {
                     ad: {
                         placement: {
                             name: {
-                                _in: req.body.placements.map(entry => entry.name)
+                                _in: placements.map(entry => entry.name)
                             }
                         }
                     }
@@ -103,7 +114,7 @@ module.exports.getAds = async (req, res, next) => {
          */
         const adsGroupByPlacement = _.groupBy(adsQueryResponse, 'placement.name');
 
-        const ads = req.body.placements.map(placement => {
+        const ads = placements.map(placement => {
             const { name, filters } = placement;
 
             if (filters && adsGroupByPlacement[name]?.length > 1) {
@@ -132,7 +143,13 @@ module.exports.getAds = async (req, res, next) => {
                     Convert from Directus { key: 'foo', value: 'bar' } format to
                     { foo: 'bar' } format
                 */
-                const values = Object.fromEntries(ad.variables.map(v => [v.key, v.value]));
+                const values = Object.fromEntries(ad.variables.map(v => {
+                    if (v.value === '$AD_IMAGE_SRC') {
+                        v.value = `${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`;
+                    }
+
+                    return [v.key, v.value];
+                }));
                 const html = template(values);
 
                 return {
@@ -151,7 +168,7 @@ module.exports.getAds = async (req, res, next) => {
 
 module.exports.adClick = async (req, res, next) => {
     try {
-        if (!validateAdClickEndpoint(req.body)) {
+        if (!validateAdClickEndpoint(req.params)) {
             res.status(422).json({
                 status: 'error',
                 message: 'Schema validation error',
@@ -160,13 +177,30 @@ module.exports.adClick = async (req, res, next) => {
             return;
         }
 
-        const { ad, url, referrer } = req.body;
+        const { id } = req.params;
+        const userAgent = req.get('user-agent');
+        const referrer = req.get('Referrer');
 
-        const doc = await directus.items(ADS_COLLECTION).readOne(ad.id, {
-            fields: ['id']
+        /*
+            Avoid counting clicks from bots
+        */
+        if (isbot(userAgent)) {
+            res.status(403).json({ status: 'error', message: 'Forbidden' });
+            return;
+        }
+        /*
+            Avoid couting clicks without referrer header
+         */
+        if (!referrer) {
+            res.status(400).json({ status: 'error', message: 'Bad request' });
+            return;
+        }
+
+        const doc = await directus.items(ADS_COLLECTION).readOne(id, {
+            fields: ['id', 'redirect']
         });
         if (!doc) {
-            res.code(404).json({ status: 'error', message: 'Resource not found' });
+            res.status(404).json({ status: 'error', message: 'Resource not found' });
             return;
         }
 
@@ -177,7 +211,7 @@ module.exports.adClick = async (req, res, next) => {
         const query = `
             UPDATE ${ADS_COLLECTION}
             SET click_count = click_count + 1
-            WHERE id = ${ad.id};
+            WHERE id = '${id}';
         `;
         await postgreClient.query(query);
 
@@ -185,14 +219,13 @@ module.exports.adClick = async (req, res, next) => {
             Insert entry on 'clicks' collection
          */
         await directus.items(CLICKS_COLLECTION).createOne({
-            ad: ad.id,
-            url,
+            ad: id,
             referrer,
-            userAgent: req.headers['user-agent'],
+            userAgent,
             ip: req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.ip
         });
 
-        res.json({ status: 'success' });
+        res.redirect(doc.redirect);
     } catch (err) {
         next(err);
     }
@@ -211,9 +244,13 @@ module.exports.getImage = async (req, res, next) => {
 
         const { id } = req.params;
         /*
-            You don't have permission to access this response if image id not found (Directus behavior)
+            You don't have permission to access this response if ad id not found (Directus behavior)
          */
-        const doc = await directus.items(IMAGES_COLLECTION).readOne(id);
+        const doc = await directus.items(ADS_COLLECTION).readOne(id, { fields: ['image'] });
+        if (!doc) {
+            res.status(404).json({ status: 'error', message: 'Resource not found' });
+            return;
+        }
 
         const headers = {
             'Authorization': `Bearer ${directus.auth.token}`

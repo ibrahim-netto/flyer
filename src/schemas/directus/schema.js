@@ -29,12 +29,6 @@ module.exports = async () => {
         return;
     }
 
-    // await directus.collections.deleteOne(CLICKS_COLLECTION);
-    // await directus.collections.deleteOne(FILTERS_COLLECTION);
-    // await directus.collections.deleteOne(ADS_COLLECTION);
-    // await directus.collections.deleteOne(PLACEMENTS_COLLECTION);
-    // await directus.collections.deleteOne(TEMPLATES_COLLECTION);
-
     logger.info('Importing started...');
 
     /*
@@ -52,11 +46,6 @@ module.exports = async () => {
     await createTemplatesCollection(TEMPLATES_COLLECTION);
     await createFiltersCollection(FILTERS_COLLECTION);
     await createClicksCollection(CLICKS_COLLECTION);
-    /*
-        @TODO createImagesCollection
-        ad: many to one
-        image: image file
-     */
 
     /*
         Set relations
@@ -64,10 +53,10 @@ module.exports = async () => {
     logger.info('Setting relations...');
     await setRelation(ADS_COLLECTION, 'placement', PLACEMENTS_COLLECTION);
     await setRelation(ADS_COLLECTION, 'template', TEMPLATES_COLLECTION);
+    await setRelation(ADS_COLLECTION, 'image', 'directus_files');
+    await setRelation(TEMPLATES_COLLECTION, 'preview', 'directus_files');
     await setRelation(FILTERS_COLLECTION, 'ad', ADS_COLLECTION);
     await setRelation(CLICKS_COLLECTION, 'ad', ADS_COLLECTION);
-
-    await setRelation(TEMPLATES_COLLECTION, 'preview', 'directus_files');
 
     const collections = [
         ADS_COLLECTION,
@@ -142,17 +131,17 @@ async function createAdsCollection(adsCollectionName) {
         collection: adsCollectionName,
         fields: [{
             field: 'id',
-            type: 'integer',
-            schema: {
-                is_primary_key: true,
-                has_auto_increment: true
-            },
+            type: 'uuid',
             meta: {
-                hidden: true,
+                hidden: false,
                 readonly: true,
                 interface: 'input',
-                special: null,
-                required: true
+                special: ['uuid']
+            },
+            schema: {
+                is_primary_key: true,
+                length: 36,
+                has_auto_increment: false
             }
         }, {
             field: 'sort',
@@ -247,6 +236,20 @@ async function createAdsCollection(adsCollectionName) {
                 }
             }
         }, {
+            field: 'image',
+            type: 'uuid',
+            schema: {
+                is_nullable: true
+            },
+            meta: {
+                interface: 'file-image',
+                special: ['file'],
+                required: false,
+                options: {
+                    crop: false
+                }
+            }
+        }, {
             field: 'variables',
             type: 'json',
             schema: {
@@ -288,6 +291,21 @@ async function createAdsCollection(adsCollectionName) {
                 display_options: {
                     format: '{{key}} => {{value}}'
                 }
+            }
+        }, {
+            field: 'redirect',
+            type: 'string',
+            schema: {
+                is_nullable: false
+            },
+            meta: {
+                interface: 'input',
+                special: null,
+                required: true,
+                options: {
+                    trim: true
+                },
+                display: 'formatted-value'
             }
         }, {
             field: 'click_count',
@@ -531,7 +549,7 @@ async function createFiltersCollection(filtersCollectionName) {
             }
         }, {
             field: 'ad',
-            type: 'integer',
+            type: 'uuid',
             schema: {
                 is_nullable: false
             },
@@ -620,7 +638,7 @@ async function createClicksCollection(clicksCollectionName) {
             }
         }, {
             field: 'ad',
-            type: 'integer',
+            type: 'uuid',
             schema: {
                 is_nullable: false
             },
@@ -632,22 +650,6 @@ async function createClicksCollection(clicksCollectionName) {
                 options: {
                     template: '{{name}}'
                 }
-            }
-        }, {
-            field: 'url',
-            type: 'string',
-            schema: {
-                is_nullable: false
-            },
-            meta: {
-                readonly: true,
-                interface: 'input',
-                special: null,
-                required: true,
-                options: {
-                    trim: true
-                },
-                display: 'formatted-value'
             }
         }, {
             field: 'referrer',

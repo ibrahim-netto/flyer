@@ -11,6 +11,18 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
     const placementAttr = `${ENDPOINT_NAME}-placement`;
     const filtersAttr = `${ENDPOINT_NAME}-filters`;
 
+    const style = document.createElement('style');
+    style.innerHTML = `
+        a.${ENDPOINT_NAME}, 
+        a.${ENDPOINT_NAME}:hover, 
+        a.${ENDPOINT_NAME}:focus, 
+        a.${ENDPOINT_NAME}:active {
+            text-decoration: none;
+            color: inherit;
+        }
+    `;
+    document.head.appendChild(style);
+
     const onNodeClick = (ad) => {
         const url = `${serverUrl}/api/${ENDPOINT_VERSION}/click`;
 
@@ -26,12 +38,6 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
             };
 
             const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
-            /*
-                A problem with sending analytics is that a site often wants to send analytics when the user
-                has finished with a page: for example, when the user navigates to another page. In this situation
-                the browser may be about to unload the page, and in that case the browser may choose not to send
-                asynchronous XMLHttpRequest requests.
-            */
             const queued = navigator.sendBeacon(url, blob);
 
             return (queued)
@@ -51,37 +57,37 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
             Name conversion dash-style to camelCase conversion
             A custom data attribute name is transformed to a key for the DOMStringMap entry.
          */
+        const params = new URLSearchParams();
         const placementAttrCamelCase = camelCase(placementAttr);
         const filtersAttrCamelCase = camelCase(filtersAttr);
-        const placements = nodes.map(node => {
+
+        nodes.map(node => {
                 const name = node.dataset[placementAttrCamelCase];
-                const filters = node.dataset[filtersAttrCamelCase] ?
-                    JSON.parse(node.dataset[filtersAttrCamelCase]) :
-                    null;
+                const filters = node.dataset[filtersAttrCamelCase] || '';
+
+                params.append('name', name);
+                params.append('filters', filters);
                 return { name, filters };
             }
         );
 
-        const body = {
-            placements
-        };
-
-        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`;
+        const url = new URL(`${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`);
+        url.search = params.toString();
 
         const { data } = await fetch(url, {
-            method: 'post',
+            method: 'GET',
             headers: {
                 'content-type': 'application/json'
-            },
-            body: JSON.stringify(body)
+            }
         }).then(response => response.json());
 
         for (const entry of data) {
             const node = nodes.find(v => v.dataset[placementAttrCamelCase] === entry.placement);
 
             if (node) {
-                node.innerHTML = entry.html;
-                node.addEventListener('click', onNodeClick(entry), true);
+                const id = entry.id;
+                const href = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`;
+                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="origin">${entry.html}</a>`;
             }
         }
     };

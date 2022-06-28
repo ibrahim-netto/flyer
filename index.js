@@ -18,7 +18,7 @@ const checkDirectus = require('./src/check-directus');
 const directusLogin = require('./src/directus-login');
 const applySchema = require('./src/schemas/directus/schema');
 const postgreTriggers = require('./src/postgre-triggers');
-const varnishHeaders = require('./src/varnish-headers');
+const { varnishProjectHeaders, varnishCacheHeaders } = require('./src/varnish-headers');
 const controller = require('./src/controller');
 const errorHandler = require('./src/error-handler');
 
@@ -67,6 +67,10 @@ const {
             app.use(Sentry.Handlers.requestHandler());
         }
 
+        if (!!+process.env.EXPRESS_VARNISH_HEADERS) {
+            app.use(varnishProjectHeaders);
+        }
+
         if (!!+process.env.EXPRESS_GZIP) {
             /*
                 For use on servers without reverse-proxy
@@ -88,10 +92,6 @@ const {
             }));
         }
 
-        if (!!+process.env.EXPRESS_VARNISH_HEADERS) {
-            app.use(varnishHeaders);
-        }
-
         if (process.env.NODE_ENV === 'development') {
             app.use(express.static('public'));
         }
@@ -105,9 +105,9 @@ const {
 
         app.use('/docs', swaggerHeaders, swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
-        app.post(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`, controller.getAds);
-        app.post(`/api/${ENDPOINT_VERSION}/click`, controller.adClick);
-        app.get(`/api/${ENDPOINT_VERSION}/images/:id`, controller.getImage);
+        app.get(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`, varnishCacheHeaders, controller.getAds);
+        app.get(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/:id/image`, varnishCacheHeaders, controller.getImage);
+        app.get(`/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/:id/click`, controller.adClick);
 
         if (process.env.SENTRY_DSN) {
             app.use(Sentry.Handlers.errorHandler());
