@@ -1,7 +1,7 @@
 const components = require('./components.swagger');
 const paths = require('./paths.swagger');
 
-const { PROJECT_NAME, VERSION, EXPRESS_PORT } = require('../constants');
+const { PROJECT_NAME, VERSION } = require('../constants');
 
 const options = {
     openapi: '3.0.0',
