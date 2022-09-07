@@ -735,7 +735,7 @@ module.exports = g;
 /*! exports provided: name, version, description, main, scripts, repository, author, license, bugs, homepage, dependencies, devDependencies, browser, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"name\":\"flyer\",\"version\":\"1.0.0\",\"description\":\"\",\"main\":\"index.js\",\"scripts\":{\"test\":\"echo \\\"Error: no test specified\\\" && exit 1\",\"dev\":\"NODE_OPTIONS=--openssl-legacy-provider webpack --env=development\",\"build\":\"NODE_OPTIONS=--openssl-legacy-provider webpack --env=production\",\"docs:dev\":\"vuepress dev docs\",\"docs:build\":\"vuepress build docs\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/ibrahim-netto/flyer.git\"},\"author\":\"Ibrahim Netto <ibrahim.netto@virail.com>\",\"license\":\"GPL-3.0-or-later\",\"bugs\":{\"url\":\"https://github.com/ibrahim-netto/flyer/issues\"},\"homepage\":\"https://github.com/ibrahim-netto/flyer#readme\",\"dependencies\":{\"@directus/sdk\":\"^9.10.0\",\"@sentry/node\":\"^6.19.7\",\"@sentry/tracing\":\"^6.19.7\",\"ajv\":\"^8.11.0\",\"ajv-formats\":\"^2.1.1\",\"body-parser\":\"^1.20.0\",\"compression\":\"^1.7.4\",\"cors\":\"^2.8.5\",\"delay\":\"^5.0.0\",\"dotenv\":\"^16.0.1\",\"express\":\"^4.18.1\",\"express-winston\":\"^4.2.0\",\"handlebars\":\"^4.7.7\",\"helmet\":\"^5.0.2\",\"isbot\":\"^3.5.0\",\"lodash\":\"^4.17.21\",\"lodash.camelcase\":\"^4.3.0\",\"node-fetch\":\"^2.6.7\",\"pg\":\"^8.7.3\",\"swagger-ui-express\":\"^4.4.0\",\"winston\":\"^3.7.2\"},\"devDependencies\":{\"@babel/core\":\"^7.18.2\",\"@babel/plugin-transform-runtime\":\"^7.18.2\",\"@babel/preset-env\":\"^7.18.2\",\"babel-loader\":\"^8.2.5\",\"vuepress\":\"^2.0.0-beta.46\",\"webpack\":\"^4.46.0\",\"webpack-cli\":\"^4.9.2\"},\"browser\":{\"fs\":false,\"path\":false}}");
+module.exports = JSON.parse("{\"name\":\"flyer\",\"version\":\"1.0.0\",\"description\":\"\",\"main\":\"index.js\",\"scripts\":{\"test\":\"echo \\\"Error: no test specified\\\" && exit 1\",\"dev\":\"NODE_OPTIONS=--openssl-legacy-provider webpack --env=development\",\"build\":\"NODE_OPTIONS=--openssl-legacy-provider webpack --env=production\",\"docs:dev\":\"vuepress dev docs\",\"docs:build\":\"vuepress build docs\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/ibrahim-netto/flyer.git\"},\"author\":\"Ibrahim Netto <ibrahim.netto@virail.com>\",\"license\":\"GPL-3.0-or-later\",\"bugs\":{\"url\":\"https://github.com/ibrahim-netto/flyer/issues\"},\"homepage\":\"https://github.com/ibrahim-netto/flyer#readme\",\"dependencies\":{\"@directus/sdk\":\"^9.10.0\",\"@sentry/node\":\"^6.19.7\",\"@sentry/tracing\":\"^6.19.7\",\"ajv\":\"^8.11.0\",\"ajv-formats\":\"^2.1.1\",\"body-parser\":\"^1.20.0\",\"compression\":\"^1.7.4\",\"cors\":\"^2.8.5\",\"delay\":\"^5.0.0\",\"dotenv\":\"^16.0.1\",\"express\":\"^4.18.1\",\"express-winston\":\"^4.2.0\",\"handlebars\":\"^4.7.7\",\"helmet\":\"^5.0.2\",\"lodash\":\"^4.17.21\",\"lodash.camelcase\":\"^4.3.0\",\"node-fetch\":\"^2.6.7\",\"pg\":\"^8.7.3\",\"swagger-ui-express\":\"^4.4.0\",\"winston\":\"^3.7.2\"},\"devDependencies\":{\"@babel/core\":\"^7.18.2\",\"@babel/plugin-transform-runtime\":\"^7.18.2\",\"@babel/preset-env\":\"^7.18.2\",\"babel-loader\":\"^8.2.5\",\"vuepress\":\"^2.0.0-beta.46\",\"webpack\":\"^4.46.0\",\"webpack-cli\":\"^4.9.2\"},\"browser\":{\"fs\":false,\"path\":false}}");
 
 /***/ }),
 
@@ -771,29 +771,6 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = __webpack_require__(/*! ../constants
         }
     `;
     document.head.appendChild(style);
-
-    const onNodeClick = (ad) => {
-        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/click`;
-
-        return async () => {
-            const body = {
-                ad: {
-                    id: ad.id,
-                    name: ad.name,
-                    placement: ad.placement
-                },
-                url: location.href,
-                referrer: document.referrer
-            };
-
-            const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
-            const queued = navigator.sendBeacon(url, blob);
-
-            return (queued)
-                ? { status: 'success', event_id: 'sendBeacon' }
-                : { status: 'error', message: 'User agent failed to queue the data transfer' };
-        }
-    };
 
     const init = async () => {
         // Convert NodeList to Array
@@ -836,7 +813,10 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = __webpack_require__(/*! ../constants
             if (node) {
                 const id = entry.id;
                 const href = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`;
-                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
+                const htmlString = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
+                const fragment = document.createRange().createContextualFragment(htmlString);
+
+                node.appendChild(fragment);
             }
         }
     };

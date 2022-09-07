@@ -28,6 +28,9 @@ const schema = {
                     maxLength: 2000
                 }
             }]
+        },
+        raw: {
+            type: 'boolean'
         }
     },
     required: [

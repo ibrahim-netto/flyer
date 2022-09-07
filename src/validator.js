@@ -1,7 +1,7 @@
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 
-const ajv = new Ajv();
+const ajv = new Ajv({ coerceTypes: true });
 addFormats(ajv);
 
 ajv.addSchema(require('./schemas/endpoints/get-ads.schema'), 'get-ads');

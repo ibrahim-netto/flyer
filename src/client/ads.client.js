@@ -23,29 +23,6 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
     `;
     document.head.appendChild(style);
 
-    const onNodeClick = (ad) => {
-        const url = `${serverUrl}/api/${ENDPOINT_VERSION}/click`;
-
-        return async () => {
-            const body = {
-                ad: {
-                    id: ad.id,
-                    name: ad.name,
-                    placement: ad.placement
-                },
-                url: location.href,
-                referrer: document.referrer
-            };
-
-            const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
-            const queued = navigator.sendBeacon(url, blob);
-
-            return (queued)
-                ? { status: 'success', event_id: 'sendBeacon' }
-                : { status: 'error', message: 'User agent failed to queue the data transfer' };
-        }
-    };
-
     const init = async () => {
         // Convert NodeList to Array
         const nodes = [...document.querySelectorAll(`*[data-${placementAttr}]`)];
@@ -87,7 +64,10 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
             if (node) {
                 const id = entry.id;
                 const href = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`;
-                node.innerHTML = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
+                const htmlString = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
+                const fragment = document.createRange().createContextualFragment(htmlString);
+
+                node.appendChild(fragment);
             }
         }
     };

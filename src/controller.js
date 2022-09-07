@@ -4,7 +4,6 @@ const Handlebars = require('handlebars');
 const postgrePool = require('./postgre-pool');
 const directus = require('./directus');
 const validator = require('./validator');
-const isbot = require('isbot');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 const validateAdClickEndpoint = validator.getSchema('ad-click');
 const validateGetImageEndpoint = validator.getSchema('get-image');
@@ -152,12 +151,19 @@ module.exports.getAds = async (req, res, next) => {
                 }));
                 const html = template(values);
 
-                return {
+                const parsed = {
                     id: ad.id,
                     name: ad.name,
                     placement: ad.placement.name,
                     html
+                };
+
+                if (req.query.raw) {
+                    parsed.template = ad.template.html;
+                    parsed.variables = values;
                 }
+
+                return parsed;
             });
 
         res.json({ status: 'success', data });
@@ -181,13 +187,6 @@ module.exports.adClick = async (req, res, next) => {
         const userAgent = req.get('user-agent');
         const referrer = req.get('Referrer');
 
-        /*
-            Avoid counting clicks from bots
-        */
-        if (isbot(userAgent)) {
-            res.status(403).json({ status: 'error', message: 'Forbidden' });
-            return;
-        }
         /*
             Avoid couting clicks without referrer header
          */
@@ -214,6 +213,7 @@ module.exports.adClick = async (req, res, next) => {
             WHERE id = '${id}';
         `;
         await postgreClient.query(query);
+        postgreClient.release();
 
         /*
             Insert entry on 'clicks' collection
