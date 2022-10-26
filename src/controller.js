@@ -7,6 +7,7 @@ const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 const validateAdClickEndpoint = validator.getSchema('ad-click');
 const validateGetImageEndpoint = validator.getSchema('get-image');
+const plugins = require('./plugins');
 
 const {
     ADS_COLLECTION,
@@ -18,16 +19,16 @@ const {
 
 module.exports.getAds = async (req, res, next) => {
     try {
-        if (!validateGetAdsEndpoint(req.query)) {
-            res.status(422).json({
-                status: 'error',
-                message: 'Schema validation error',
-                errors: validateGetAdsEndpoint.errors
-            });
-            return;
-        }
+        // if (!validateGetAdsEndpoint(req.query)) {
+        //     res.status(422).json({
+        //         status: 'error',
+        //         message: 'Schema validation error',
+        //         errors: validateGetAdsEndpoint.errors
+        //     });
+        //     return;
+        // }
 
-        const names = Array.isArray(req.query.name) ? req.query.name : [req.query.name];
+        const names = Array.isArray(req.query.placement) ? req.query.placement : [req.query.placement];
         const filters = Array.isArray(req.query.filters) ? req.query.filters : [req.query.filters];
         const placements = names.map((name, i) => {
             return {
@@ -173,6 +174,11 @@ module.exports.getAds = async (req, res, next) => {
 }
 
 module.exports.adClick = async (req, res, next) => {
+    /*
+        Set shared context
+    */
+    if (!req.data) req.data = {};
+
     try {
         if (!validateAdClickEndpoint(req.params)) {
             res.status(422).json({
@@ -196,11 +202,23 @@ module.exports.adClick = async (req, res, next) => {
         }
 
         const doc = await directus.items(ADS_COLLECTION).readOne(id, {
-            fields: ['id', 'redirect']
+            fields: ['id', 'variables', 'redirect', 'plugins']
         });
+
         if (!doc) {
             res.status(404).json({ status: 'error', message: 'Resource not found' });
             return;
+        }
+
+        req.data.doc = doc;
+
+        for (const plugin of doc?.plugins) {
+            const name = plugin.replace('.plugin.js', '');
+            if (plugins[name].hook !== 'adClick') continue;
+            /*
+                Run plugin
+             */
+            await plugins[name](req);
         }
 
         /*
@@ -277,3 +295,5 @@ module.exports.getImage = async (req, res, next) => {
         next(err);
     }
 }
+
+// https://www.thetrainline.com/book/results?lang={{lang}}&currency={{currency}}&origin={{origin}}&destination={{destination}}&outwardDate={{outwardDate}}&outwardDateType=departAfter&selectExactTime=true&journeySearchType=single&directSearch=false

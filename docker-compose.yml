@@ -21,6 +21,8 @@ services:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
+    ports:
+      - "5432:5432"
 
   redis:
     container_name: flyer.redis

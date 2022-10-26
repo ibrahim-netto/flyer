@@ -5,7 +5,7 @@ const { Pool } = require('pg');
     change client host to 'localhost'
  */
 const postgrePool = new Pool({
-    host: 'localhost',
+    host: process.env.DIRECTUS_DB_HOST,
     port: process.env.DIRECTUS_DB_PORT,
     user: process.env.DIRECTUS_DB_USER,
     password: process.env.DIRECTUS_DB_PASSWORD,

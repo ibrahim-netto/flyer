@@ -9,7 +9,6 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
 
     const serverUrl = attr('data-server-url') || `${location.origin}`; // default value
     const placementAttr = `${ENDPOINT_NAME}-placement`;
-    const filtersAttr = `${ENDPOINT_NAME}-filters`;
 
     const style = document.createElement('style');
     style.innerHTML = `
@@ -36,17 +35,15 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
          */
         const params = new URLSearchParams();
         const placementAttrCamelCase = camelCase(placementAttr);
-        const filtersAttrCamelCase = camelCase(filtersAttr);
 
-        nodes.map(node => {
-                const name = node.dataset[placementAttrCamelCase];
-                const filters = node.dataset[filtersAttrCamelCase] || '';
-
-                params.append('name', name);
-                params.append('filters', filters);
-                return { name, filters };
+        for (const node of nodes) {
+            for (const key in node.dataset) {
+                if (key.startsWith(ENDPOINT_NAME)) {
+                    const keyWithoutPrefix = camelCase(key.replace(ENDPOINT_NAME, ''));
+                    params.append(keyWithoutPrefix, node.dataset[key]);
+                }
             }
-        );
+        }
 
         const url = new URL(`${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}`);
         url.search = params.toString();
@@ -63,8 +60,11 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = require('../constants');
 
             if (node) {
                 const id = entry.id;
-                const href = `${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`;
-                const htmlString = `<a class="${ENDPOINT_NAME}" href="${href}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
+
+                const url = new URL(`${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`);
+                url.search = params.toString();
+
+                const htmlString = `<a class="${ENDPOINT_NAME}" href="${url.toString()}" referrerpolicy="no-referrer-when-downgrade">${entry.html}</a>`;
                 const fragment = document.createRange().createContextualFragment(htmlString);
 
                 node.appendChild(fragment);

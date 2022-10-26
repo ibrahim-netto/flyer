@@ -105,5 +105,6 @@ typings/
 .idea
 data
 uploads
-plugins
+/plugins
+/src/plugins/
 /docs/.vuepress/dist
