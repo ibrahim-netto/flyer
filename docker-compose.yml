@@ -93,6 +93,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/app
+      - ./node_modules:/app/node_modules
     working_dir: /app
     command: node ./index.js
     env_file:
