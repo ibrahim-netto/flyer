@@ -810,6 +810,14 @@ const { ENDPOINT_VERSION, ENDPOINT_NAME } = __webpack_require__(/*! ../constants
             if (node) {
                 const id = entry.id;
 
+                const params = new URLSearchParams();
+                for (const key in node.dataset) {
+                    if (key.startsWith(ENDPOINT_NAME)) {
+                        const keyWithoutPrefix = camelCase(key.replace(ENDPOINT_NAME, ''));
+                        params.append(keyWithoutPrefix, node.dataset[key]);
+                    }
+                }
+
                 const url = new URL(`${serverUrl}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${id}/click`);
                 url.search = params.toString();
 

@@ -212,7 +212,7 @@ module.exports.adClick = async (req, res, next) => {
 
         req.data.doc = doc;
 
-        for (const plugin of doc?.plugins) {
+        for (const plugin of doc?.plugins || []) {
             const name = plugin.replace('.plugin.js', '');
             if (plugins[name]?.hook !== 'adClick') continue;
             /*
