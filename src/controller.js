@@ -57,7 +57,8 @@ module.exports.getAds = async (req, res, next) => {
                 'status',
                 'placement.name',
                 'template.html',
-                'variables'
+                'variables',
+                'plugins'
             ],
             limit: -1 // return all results
         };
@@ -144,8 +145,20 @@ module.exports.getAds = async (req, res, next) => {
                     { foo: 'bar' } format
                 */
                 const values = Object.fromEntries(ad.variables.map(v => {
-                    if (v.value === '$AD_IMAGE_SRC') {
-                        v.value = `${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`;
+                    if (v.value.startsWith('$IMAGE')) {
+                        const tags = v.value
+                            .split('_')
+                            .slice(1);
+
+                        const params = new URLSearchParams();
+                        for (const tag of tags) {
+                            params.append('tags', tag.toLowerCase());
+                        }
+
+                        const url = new URL(`${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`);
+                        url.search = params.toString();
+
+                        v.value = url.toString();
                     }
 
                     return [v.key, v.value];
@@ -163,6 +176,15 @@ module.exports.getAds = async (req, res, next) => {
                     parsed.template = ad.template.html;
                     parsed.variables = values;
                 }
+
+                // for (const plugin of ad?.plugins || []) {
+                //     const name = plugin.replace('.plugin.js', '');
+                //     if (plugins[name]?.hook !== 'ad') continue;
+                //     /*
+                //         Run plugin
+                //      */
+                //     await plugins[name](req, ad, parsed);
+                // }
 
                 return parsed;
             });
@@ -261,11 +283,33 @@ module.exports.getImage = async (req, res, next) => {
         }
 
         const { id } = req.params;
+
+        let tags;
+        if (typeof req.query.tags === 'string') {
+            tags = [req.query.tags];
+        } else if (Array.isArray(req.query.tags)) {
+            tags = req.query.tags;
+        } else {
+            tags = null;
+        }
+
         /*
             You don't have permission to access this response if ad id not found (Directus behavior)
          */
-        const doc = await directus.items(ADS_COLLECTION).readOne(id, { fields: ['image'] });
-        if (!doc) {
+        const ad = await directus.items(ADS_COLLECTION).readOne(id, {
+            fields: [
+                'images'
+            ]
+        });
+        if (!ad || !ad?.images || !ad?.images?.length) {
+            res.status(404).json({ status: 'error', message: 'Resource not found' });
+            return;
+        }
+        const aliases = await directus.items('ads_files').readMany(ad.images);
+        const adImages = await directus.files.readMany(aliases.data.map(v => v.directus_files_id));
+        const image = adImages.data.find(v => _.isEqual(v.tags, tags));
+
+        if (!image) {
             res.status(404).json({ status: 'error', message: 'Resource not found' });
             return;
         }
@@ -273,7 +317,7 @@ module.exports.getImage = async (req, res, next) => {
         const headers = {
             'Authorization': `Bearer ${directus.auth.token}`
         };
-        const response = await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/assets/${doc.image}`, {
+        const response = await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/assets/${image.id}`, {
             method: 'GET',
             headers
         });
@@ -295,5 +339,3 @@ module.exports.getImage = async (req, res, next) => {
         next(err);
     }
 }
-
-// https://www.thetrainline.com/book/results?lang={{lang}}&currency={{currency}}&origin={{origin}}&destination={{destination}}&outwardDate={{outwardDate}}&outwardDateType=departAfter&selectExactTime=true&journeySearchType=single&directSearch=false
