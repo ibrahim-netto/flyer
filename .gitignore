@@ -103,8 +103,8 @@ typings/
 .tern-port
 
 .idea
+.config
 data
 uploads
 /plugins
-/src/plugins/
 /docs/.vuepress/dist

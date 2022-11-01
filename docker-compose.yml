@@ -30,7 +30,7 @@ services:
     image: redis:6
     restart: unless-stopped
     volumes:
-      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - .config/redis/redis.conf:/usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 5s
@@ -110,7 +110,7 @@ services:
         condition: service_started
     volumes:
       - /vcache
-      - ./config/varnish/varnish_backends.vcl:/usr/share/varnish/vcl/varnish_backends.vcl
+      - .config/varnish/varnish_backends.vcl:/usr/share/varnish/vcl/varnish_backends.vcl
     ports:
       - ${VARNISH_LISTEN:-80}:80
     environment:
