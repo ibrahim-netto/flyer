@@ -14,7 +14,7 @@ module.exports.setCollectionLayoutColumnsOrder = async (collection, columnsOrder
         collection: collection
     }
 
-    return fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/presets`, {
+    return fetch(`${process.env.EXPRESS_DIRECTUS_SLAVE_API_URL}/presets`, {
         headers,
         body: JSON.stringify(preset),
         'method': 'POST'

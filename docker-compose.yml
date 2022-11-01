@@ -59,11 +59,7 @@ services:
       KEY: ${DIRECTUS_KEY}
       SECRET: ${DIRECTUS_SECRET}
       DB_CLIENT: ${DIRECTUS_DB_CLIENT:-pg}
-      DB_HOST: ${DIRECTUS_DB_HOST:-postgres}
-      DB_PORT: ${DIRECTUS_DB_PORT:-postgres}
-      DB_DATABASE: ${DIRECTUS_DB_DATABASE:-postgres}
-      DB_USER: ${DIRECTUS_DB_USER:-postgres}
-      DB_PASSWORD: ${DIRECTUS_DB_PASSWORD:-postgres}
+      DB_CONNECTION_STRING: ${POSTGRES_MASTER_URI:-postgres://postgres:postgres@localhost:5432/postgres}
       CACHE_ENABLED: ${DIRECTUS_CACHE_ENABLED:-false}
       CACHE_STORE: ${DIRECTUS_CACHE_STORE:-redis}
       CACHE_REDIS: ${DIRECTUS_CACHE_REDIS:-redis://redis:6379}

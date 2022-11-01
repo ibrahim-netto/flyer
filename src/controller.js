@@ -317,7 +317,7 @@ module.exports.getImage = async (req, res, next) => {
         const headers = {
             'Authorization': `Bearer ${directus.auth.token}`
         };
-        const response = await fetch(`${process.env.EXPRESS_DIRECTUS_API_URL}/assets/${image.id}`, {
+        const response = await fetch(`${process.env.EXPRESS_DIRECTUS_SLAVE_API_URL}/assets/${image.id}`, {
             method: 'GET',
             headers
         });

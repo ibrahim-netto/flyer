@@ -1,7 +1,7 @@
 const logger = require('./logger');
 
 module.exports = (err, req, res, next) => {
-    logger.error(JSON.stringify(err));
+    logger.error(err?.stack || err?.message);
 
     if (res.headersSent) {
         return next(err);
