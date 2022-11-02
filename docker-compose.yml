@@ -12,7 +12,6 @@ services:
     container_name: ${POSTGRES_CONTAINER_NAME:-virail.flyer.postgresql}
     hostname: postgresql
     restart: unless-stopped
-    shm_size: '2gb'
     volumes:
       - data-postgresql:/var/lib/postgresql/data
       - .config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
