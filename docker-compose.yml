@@ -15,8 +15,8 @@ services:
     shm_size: '2gb'
     volumes:
       - data-postgresql:/var/lib/postgresql/data
-      - .config/postgresql.conf:/etc/postgresql/postgresql.conf
-      - .config/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - .config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+      - .config/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
     ports:
       - ${POSTGRES_LISTEN:-0.0.0.0:5432}:5432
     environment:
@@ -41,7 +41,7 @@ services:
     hostname: redis
     restart: unless-stopped
     volumes:
-      - .config/redis.conf:/usr/local/etc/redis/redis.conf
+      - .config/redis/redis.conf:/usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 5s
