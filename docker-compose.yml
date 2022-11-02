@@ -90,6 +90,12 @@ services:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8055/server/health || exit 1
+      start_period: 15s
+      interval: 15s
+      timeout: 15s
+      retries: 3
 
   node:
     profiles: ["production"]
@@ -98,7 +104,7 @@ services:
     hostname: node
     depends_on:
       directus:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
     volumes:
       - .:/app
