@@ -52,7 +52,7 @@ services:
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
 
   directus:
-    image: directus/directus:${DIRECTUS_VERSION:-9.20.2}
+    image: directus/directus:${DIRECTUS_VERSION:-9.20.3}
     container_name: ${DIRECTUS_CONTAINER_NAME:-virail.flyer.directus}
     hostname: directus
     depends_on:
@@ -70,11 +70,20 @@ services:
       SECRET: ${DIRECTUS_SECRET:-secret}
       DB_CLIENT: ${DIRECTUS_DB_CLIENT:-pg}
       DB_CONNECTION_STRING: ${POSTGRES_MASTER_URI:-postgres://postgres:postgres@postgresql:5432/postgres}
+      STORAGE_LOCATIONS: ${DIRECTUS_STORAGE_LOCATIONS:-local}
+      STORAGE_LOCAL_DRIVER: 'local'
+      STORAGE_LOCAL_ROOT: ${DIRECTUS_STORAGE_S3_DRIVER:./uploads}
+      STORAGE_S3_DRIVER: 's3'
+      STORAGE_S3_KEY: ${DIRECTUS_STORAGE_S3_KEY}
+      STORAGE_S3_SECRET: ${DIRECTUS_STORAGE_S3_SECRET}
+      STORAGE_S3_BUCKET: ${DIRECTUS_STORAGE_S3_BUCKET}
+      STORAGE_S3_REGION: ${DIRECTUS_STORAGE_S3_REGION}
+      STORAGE_S3_ENDPOINT: ${DIRECTUS_STORAGE_S3_ENDPOINT}
       CACHE_ENABLED: ${DIRECTUS_CACHE_ENABLED:-false}
       CACHE_STORE: ${DIRECTUS_CACHE_STORE:-redis}
       CACHE_REDIS: ${DIRECTUS_CACHE_REDIS:-redis://redis:6379}
       CACHE_NAMESPACE: virail-flyer
-      CACHE_TTL: ${DIRECTUS_CACHE_TTL:-7d}
+      CACHE_TTL: ${DIRECTUS_CACHE_TTL:-1h}
       CACHE_AUTO_PURGE: 'true'
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@example.com}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-d1r3ctu5}
