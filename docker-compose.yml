@@ -1,38 +1,47 @@
 version: "3.9"
 
+volumes:
+  data-postgresql:
+    driver: local
+  data-directus:
+    driver: local
+
 services:
-  postgres:
-    container_name: flyer.postgres
-    hostname: postgres
-    image: postgis/postgis:13-master
+  postgresql:
+    image: postgis/postgis:${POSTGRES_VERSION:-13-3.3}
+    container_name: ${POSTGRES_CONTAINER_NAME:-virail.flyer.postgresql}
+    hostname: postgresql
     restart: unless-stopped
+    shm_size: '2gb'
     volumes:
-      - ./data/database:/var/lib/postgresql/data
-      - .config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
-      - .config/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - data-postgresql:/var/lib/postgresql/data
+      - .config/postgresql.conf:/etc/postgresql/postgresql.conf
+      - .config/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    ports:
+      - ${POSTGRES_LISTEN:-0.0.0.0:5432}:5432
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD:-trust}
+    logging:
+      options:
+        max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
+        max-file: ${DOCKER_LOG_MAX_FILE:-3}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 3s
       retries: 10
-    logging:
-      options:
-        max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
-        max-file: ${DOCKER_LOG_MAX_FILE:-3}
-    ports:
-      - "5432:5432"
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
   redis:
-    container_name: flyer.redis
-    hostname: redis
     image: redis:6
+    container_name: ${REDIS_CONTAINER_NAME:-virail.flyer.redis}
+    hostname: redis
     restart: unless-stopped
     volumes:
-      - .config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - .config/redis.conf:/usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 5s
@@ -44,27 +53,30 @@ services:
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
 
   directus:
-    container_name: flyer.directus
+    image: directus/directus:${DIRECTUS_VERSION:-9.20.2}
+    container_name: ${DIRECTUS_CONTAINER_NAME:-virail.flyer.directus}
     hostname: directus
-    image: directus/directus:latest
-    restart: unless-stopped
     depends_on:
-      postgres:
+      postgresql:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - data-directus:/directus/uploads
     ports:
       - ${DIRECTUS_LISTEN:-8055}:8055
-    volumes:
-      - ./uploads:/directus/uploads:rw
     environment:
-      KEY: ${DIRECTUS_KEY}
-      SECRET: ${DIRECTUS_SECRET}
+      KEY: ${DIRECTUS_KEY:-key}
+      SECRET: ${DIRECTUS_SECRET:-secret}
       DB_CLIENT: ${DIRECTUS_DB_CLIENT:-pg}
-      DB_CONNECTION_STRING: ${POSTGRES_MASTER_URI:-postgres://postgres:postgres@localhost:5432/postgres}
+      DB_CONNECTION_STRING: ${POSTGRES_MASTER_URI:-postgres://postgres:postgres@postgresql:5432/postgres}
       CACHE_ENABLED: ${DIRECTUS_CACHE_ENABLED:-false}
       CACHE_STORE: ${DIRECTUS_CACHE_STORE:-redis}
       CACHE_REDIS: ${DIRECTUS_CACHE_REDIS:-redis://redis:6379}
+      CACHE_NAMESPACE: virail-flyer
+      CACHE_TTL: ${DIRECTUS_CACHE_TTL:-7d}
+      CACHE_AUTO_PURGE: 'true'
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@example.com}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-d1r3ctu5}
       AUTH_PROVIDERS: ${DIRECTUS_AUTH_PROVIDERS}
@@ -74,7 +86,7 @@ services:
       AUTH_GOOGLE_ISSUER_URL: ${DIRECTUS_AUTH_GOOGLE_ISSUER_URL}
       AUTH_GOOGLE_ICON: ${DIRECTUS_AUTH_GOOGLE_ICON:-google}
       AUTH_GOOGLE_IDENTIFIER_KEY: ${DIRECTUS_AUTH_GOOGLE_IDENTIFIER_KEY:-email}
-      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
     logging:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
@@ -82,51 +94,23 @@ services:
 
   node:
     profiles: ["production"]
-    container_name: flyer.node
-    hostname: node
     build: .
+    container_name: ${NODE_CONTAINER_NAME:-virail.flyer.node}
+    hostname: node
     depends_on:
       directus:
         condition: service_started
     restart: unless-stopped
     volumes:
       - .:/app
-      - ./node_modules:/app/node_modules
-    working_dir: /app
-    command: node ./index.js
+      - ./node_modules:/app/node_modules:rw
+    ports:
+      - ${NODE_LISTEN:-127.0.0.1:3000}:3000
     env_file:
       - .env
     logging:
       options:
         max-size: ${DOCKER_LOG_MAX_SIZE:-10m}
         max-file: ${DOCKER_LOG_MAX_FILE:-3}
-
-  varnish:
-    profiles: ["production"]
-    container_name: flyer.varnish
-    hostname: varnish
-    image: darioguarascio/varnish-elk-docker:latest
-    restart: unless-stopped
-    depends_on:
-      node:
-        condition: service_started
-    volumes:
-      - /vcache
-      - .config/varnish/varnish_backends.vcl:/usr/share/varnish/vcl/varnish_backends.vcl
-    ports:
-      - ${VARNISH_LISTEN:-80}:80
-    environment:
-      ENV: ${VARNISH_ENV:-dev}
-      VARNISHD_MEMORY: ${VARNISH_MEMORY:-malloc,32m}
-      VARNISH_PURGE_KEY: ${VARNISH_PURGE_KEY:-dev}
-    healthcheck:
-      test: ["CMD", "sh", "-c", "test -e /proc/`cat /varnish.pid` || (kill -s 15 -1 && (sleep 10; kill -s 9 -1))"]
-      interval: 5s
-      timeout: 1s
-      retries: 1
-      start_period: 5s
-    logging:
-      driver: syslog
-      options:
-        cache-disabled: "false"
-        syslog-address: udp://${VARNISH_LOGGER_IP:-127.0.0.1}:${VARNISH_LOGGER_PORT:-5445}
+    working_dir: /app
+    command: node ./index.js
