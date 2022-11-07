@@ -16,8 +16,6 @@ services:
       - data-postgresql:/var/lib/postgresql/data
       - .config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
       - .config/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
-    ports:
-      - ${POSTGRES_LISTEN-}:5432
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
