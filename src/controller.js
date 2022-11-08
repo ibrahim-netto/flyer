@@ -144,25 +144,27 @@ module.exports.getAds = async (req, res, next) => {
                 Convert from Directus { key: 'foo', value: 'bar' } format to
                 { foo: 'bar' } format
             */
-            const values = Object.fromEntries(ad.variables.map(v => {
-                if (v.value.startsWith('$IMAGE')) {
-                    const tags = v.value
-                        .split('_')
-                        .slice(1);
 
-                    const params = new URLSearchParams();
-                    for (const tag of tags) {
-                        params.append('tags', tag.toLowerCase());
+            const values = Array.isArray(ad.variables) ?
+                Object.fromEntries(ad.variables.map(v => {
+                    if (v.value.startsWith('$IMAGE')) {
+                        const tags = v.value
+                            .split('_')
+                            .slice(1);
+
+                        const params = new URLSearchParams();
+                        for (const tag of tags) {
+                            params.append('tags', tag.toLowerCase());
+                        }
+
+                        const url = new URL(`${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`);
+                        url.search = params.toString();
+
+                        v.value = url.toString();
                     }
 
-                    const url = new URL(`${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`);
-                    url.search = params.toString();
-
-                    v.value = url.toString();
-                }
-
-                return [v.key, v.value];
-            }));
+                    return [v.key, v.value];
+                })) : {};
             const html = template(values);
 
             const parsed = {
