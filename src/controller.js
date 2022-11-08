@@ -125,12 +125,16 @@ module.exports.getAds = async (req, res, next) => {
                 const priorityAd = filtersQueryResponse.find(filter => {
                     return filter.ad.placement.name === name && _.isEqual(filters, filter.variables);
                 });
-
                 if (priorityAd) return priorityAd.ad;
+
+                const defaultAd = filtersQueryResponse.find(filter => {
+                    return filter.ad.placement.name === name && _.isEqual({ defaultAd: 'true' }, filter.variables);
+                });
+                if (defaultAd) return defaultAd.ad;
             }
 
             /*
-                If there's no priority ad and there are multiple ads for one placement, return the
+                If there's no priority ad, no default ad and there are multiple ads for one placement, return the
                 first ad of the group
             */
             return adsGroupByPlacement[name] ? adsGroupByPlacement[name][0] : null;
