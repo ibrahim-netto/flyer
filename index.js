@@ -14,7 +14,6 @@ const corsOptions = require('./src/cors-options');
 const swaggerHeaders = require('./src/swagger/headers.swagger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerOptions = require('./src/swagger/options.swagger');
-const directusLogin = require('./src/directus-login');
 const applySchema = require('./src/schemas/directus/schema');
 const postgreTriggers = require('./src/postgre-triggers');
 const { varnishProjectHeaders, varnishCacheHeaders } = require('./src/varnish-headers');
@@ -30,9 +29,8 @@ const {
 
 (async () => {
     /*
-        Set static token, default schema & load example data
+        Default schema & example data
      */
-    await directusLogin();
     await applySchema();
     await postgreTriggers();
 

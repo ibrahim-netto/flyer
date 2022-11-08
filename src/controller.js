@@ -2,7 +2,7 @@ const _ = require('lodash');
 const fetch = require('node-fetch');
 const Handlebars = require('handlebars');
 const postgrePool = require('./postgre-pool');
-const directus = require('./directus');
+const directus = require('./directus-read');
 const validator = require('./validator');
 const validateGetAdsEndpoint = validator.getSchema('get-ads');
 const validateAdClickEndpoint = validator.getSchema('ad-click');
@@ -136,58 +136,58 @@ module.exports.getAds = async (req, res, next) => {
             return adsGroupByPlacement[name] ? adsGroupByPlacement[name][0] : null;
         });
 
-        const data = ads
-            .filter(ad => !!ad)
-            .map(ad => {
-                const template = Handlebars.compile(ad.template.html);
-                /*
-                    Convert from Directus { key: 'foo', value: 'bar' } format to
-                    { foo: 'bar' } format
-                */
-                const values = Object.fromEntries(ad.variables.map(v => {
-                    if (v.value.startsWith('$IMAGE')) {
-                        const tags = v.value
-                            .split('_')
-                            .slice(1);
+        const data = [];
 
-                        const params = new URLSearchParams();
-                        for (const tag of tags) {
-                            params.append('tags', tag.toLowerCase());
-                        }
+        for (const ad of ads.filter(ad => !!ad)) {
+            const template = Handlebars.compile(ad.template.html);
+            /*
+                Convert from Directus { key: 'foo', value: 'bar' } format to
+                { foo: 'bar' } format
+            */
+            const values = Object.fromEntries(ad.variables.map(v => {
+                if (v.value.startsWith('$IMAGE')) {
+                    const tags = v.value
+                        .split('_')
+                        .slice(1);
 
-                        const url = new URL(`${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`);
-                        url.search = params.toString();
-
-                        v.value = url.toString();
+                    const params = new URLSearchParams();
+                    for (const tag of tags) {
+                        params.append('tags', tag.toLowerCase());
                     }
 
-                    return [v.key, v.value];
-                }));
-                const html = template(values);
+                    const url = new URL(`${process.env.EXPRESS_PUBLIC_URL}/api/${ENDPOINT_VERSION}/${ENDPOINT_NAME}/${ad.id}/image`);
+                    url.search = params.toString();
 
-                const parsed = {
-                    id: ad.id,
-                    name: ad.name,
-                    placement: ad.placement.name,
-                    html
-                };
-
-                if (req.query.raw) {
-                    parsed.template = ad.template.html;
-                    parsed.variables = values;
+                    v.value = url.toString();
                 }
 
-                // for (const plugin of ad?.plugins || []) {
-                //     const name = plugin.replace('.plugin.js', '');
-                //     if (plugins[name]?.hook !== 'ad') continue;
-                //     /*
-                //         Run plugin
-                //      */
-                //     await plugins[name](req, ad, parsed);
-                // }
+                return [v.key, v.value];
+            }));
+            const html = template(values);
 
-                return parsed;
-            });
+            const parsed = {
+                id: ad.id,
+                name: ad.name,
+                placement: ad.placement.name,
+                html
+            };
+
+            if (req.query.raw) {
+                parsed.template = ad.template.html;
+                parsed.variables = values;
+            }
+
+            for (const plugin of ad?.plugins || []) {
+                const name = plugin.replace('.plugin.js', '');
+                if (plugins[name]?.hook !== 'ad') continue;
+                /*
+                    Run plugin
+                 */
+                await plugins[name](req, ad, parsed);
+            }
+
+            data.push(parsed);
+        }
 
         res.json({ status: 'success', data });
     } catch (err) {

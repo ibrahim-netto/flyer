@@ -1,4 +1,4 @@
-const directus = require('./directus');
+const directus = require('./directus-read');
 const fetch = require('node-fetch');
 
 module.exports.setCollectionLayoutColumnsOrder = async (collection, columnsOrder, user) => {

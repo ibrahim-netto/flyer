@@ -1,6 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
-const directus = require('../../directus');
+const directus = require('../../directus-write');
 const logger = require('../../logger');
 const { setCollectionLayoutColumnsOrder } = require('../../utils');
 const metadataFields = require('./metadata.fields');

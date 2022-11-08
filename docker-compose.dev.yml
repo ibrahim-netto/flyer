@@ -1,0 +1,6 @@
+version: "3.9"
+
+services:
+  postgresql:
+    ports:
+      - ${POSTGRES_LISTEN:-127.0.0.1:5432}:5432
